@@ -1,0 +1,114 @@
+
+<header>
+ <h1>CapyCámaras</h1>
+ <div id="statusLine" role="status" aria-live="polite">Iniciando…</div>
+ <div class="capytabs" role="tablist" aria-label="Vista">
+  <button id="tabViewer" class="active" type="button" role="tab" aria-selected="true">▣ Visor</button>
+  <button id="tabMap" type="button" role="tab" aria-selected="false">🗺 Mapa</button>
+ </div>
+ <div class="hdrBtns">
+  <button id="btnCatalog" class="primary" title="Volver a consultar los catálogos de cámaras">⟳ Actualizar cámaras</button>
+ </div>
+</header>
+<div id="viewerPanel">
+<div class="app">
+<aside>
+ <div class="filters">
+  <input id="q" class="full" type="search" placeholder="Buscar municipio, carretera, provincia, nombre…" aria-label="Buscar">
+  <select id="fOrg" aria-label="Organismo / fuente"></select>
+  <select id="fKind" aria-label="Tipo de cámara">
+   <option value="">Todos los tipos</option>
+   <option value="img">Imagen / cámara</option>
+   <option value="video">Vídeo en directo</option>
+   <option value="liveimg">Cámara municipal actualizada</option>
+   <option value="portal">Portal externo</option>
+  </select>
+  <select id="fZone" aria-label="Zona / país"></select>
+  <select id="fProv" aria-label="Provincia"></select>
+  <select id="fTown" aria-label="Localidad"></select>
+  <select id="fRoad" aria-label="Carretera"></select>
+  <select id="fDist" aria-label="Distancia máxima a Paiporta">
+   <option value="0">Cualquier distancia</option>
+   <option value="10">≤ 10 km de Paiporta</option>
+   <option value="25">≤ 25 km de Paiporta</option>
+   <option value="50">≤ 50 km de Paiporta</option>
+   <option value="100">≤ 100 km de Paiporta</option>
+  </select>
+  <select id="fSort" class="full" aria-label="Ordenar">
+   <option value="dist">Ordenar: más cerca de Paiporta</option>
+   <option value="road">Ordenar: carretera y punto km</option>
+   <option value="town">Ordenar: localidad</option>
+  </select>
+ </div>
+ <details class="sources">
+  <summary>🌍 Fuentes mundiales de cámaras</summary>
+  <div class="srcList" id="srcList"></div>
+  <p class="srcNote">Catálogos públicos de acceso libre. Se descargan solo al marcar la casilla y quedan en memoria de esta sesión. Los que no tienen API van como portal incrustado.</p>
+ </details>
+ <div class="listMeta"><span id="count">0 cámaras</span><label><input id="thumbs" type="checkbox" checked=""> Miniaturas</label><button id="btnReset" style="padding:4px 8px;font-size:12px">Limpiar filtros</button></div>
+ <div id="list" aria-label="Lista de cámaras"></div>
+</aside>
+<main>
+ <div id="banner" class="hidden"></div>
+ <div class="topline"><div><h2 id="camTitle">Selecciona una cámara</h2><div id="camInfo">Elige una cámara de la lista. Las cámaras de la DGT se cargan automáticamente desde su servicio oficial.</div></div><div id="camChips"></div></div>
+ <div class="actions">
+  <button id="btnReload">↻ Recargar imagen</button>
+  <button id="btnOpen">Abrir fuente</button>
+  <button id="btnMap">Ver en mapa</button>
+  <button id="btnFull">⛶ Pantalla completa</button>
+  <button id="btnDel" class="hidden">Quitar cámara</button>
+ </div>
+ <div class="actions">
+  <label>Actualización automática
+   <select id="autoInt" aria-label="Intervalo de actualización automática">
+    <option value="0">Desactivada</option>
+    <option value="60">cada 1 min</option>
+    <option value="120">cada 2 min</option>
+    <option value="300" selected="">cada 5 min</option>
+    <option value="600">cada 10 min</option>
+    <option value="1800">cada 30 min</option>
+   </select>
+  </label>
+  <button id="btnPause">⏸ Pausar</button>
+  <span id="countdown" class="note" style="margin:0"></span>
+ </div>
+ <div class="viewer" id="viewer">
+  <img id="still" class="media hidden" alt="Imagen actual de la cámara">
+  <video id="video" class="hidden" controls="" muted="" playsinline=""></video>
+  
+  <div id="overlay"><span>Selecciona una cámara de la lista.</span></div>
+ </div>
+ <p class="note" id="viewNote"></p>
+ <div id="resList" class="note"></div>
+ <details class="custom">
+  <summary>＋ Añadir una cámara propia (imagen, MJPEG, HLS, vídeo o página incrustable)</summary>
+  <form id="addForm">
+   <input class="full" id="cName" placeholder="Nombre" required="" maxlength="80">
+   <input class="full" id="cUrl" type="url" placeholder="https://…" required="">
+   <select id="cType" aria-label="Formato">
+    <option value="img">Imagen fija (JPEG/PNG)</option>
+    <option value="mjpeg">Vídeo MJPEG</option>
+    <option value="hls">Vídeo HLS (.m3u8)</option>
+    <option value="video">Vídeo MP4/WebM</option>
+    <option value="iframe">Página incrustable</option>
+   </select>
+   <input id="cTown" placeholder="Localidad (opcional)" maxlength="60">
+   <button class="primary full" type="submit">Guardar cámara</button>
+  </form>
+  <p class="note">Solo añade fuentes públicas cuyo uso esté permitido. Se guardan únicamente en este navegador.</p>
+ </details>
+ <p class="note">Las cámaras de la DGT publican fotogramas fijos que el organismo renueva periódicamente, no vídeo continuo. Las cámaras municipales de València se publican como página de visualización: se muestran incrustadas y, si existe imagen directa, se carga sola con refresco automático. Las fuentes mundiales proceden de catálogos públicos (Fintraffic, Transport for London, Ayuntamiento de Madrid, Caltrans) y se activan a mano. Este visor no intenta saltarse restricciones de los proveedores (hotlinking, X-Frame-Options, autenticación): cuando una fuente no se puede mostrar, la tarjeta se conserva con el motivo y un enlace para abrirla fuera.</p>
+</main>
+</div>
+</div>
+<div id="mapPanel" aria-label="Mapa de cámaras">
+ <div id="cameraMap"></div>
+ <div class="mapLegend">
+  <div><span style="background:#35b86b"></span>DGT</div>
+  <div><span style="background:#e8b64c"></span>Municipal València</div>
+  <div><span style="background:#9b6cff"></span>Otras / propias / mundo</div>
+ </div>
+</div>
+
+
+
