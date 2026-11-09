@@ -6,152 +6,631 @@
 <meta name="theme-color" content="#0a0e13">
 <meta name="referrer" content="no-referrer">
 <title>CapyCámaras · visor</title>
-<link rel="preconnect" href="https://services1.arcgis.com" crossorigin>
-<link rel="preconnect" href="https://etraffic.dgt.es">
-<link rel="preconnect" href="https://geoportal.valencia.es" crossorigin>
-<link rel="stylesheet" href="styles.css">
-<script src="app.js" defer></script>
+<style>
+:root{color-scheme:dark;--bg:#0a0e13;--s:#11171f;--s2:#161e28;--s3:#1c2732;--l:rgba(255,255,255,.07);--l2:rgba(255,255,255,.16);--tx:#e9eff5;--mu:#93a2b0;--di:#64737f;--ac:#4fd1a5;--ai:#04231b;--as:rgba(79,209,165,.13);--w:#e8b64c;--e:#ef7b7b;--r:14px}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{background:radial-gradient(1100px 620px at 14% -12%,#14212e 0%,var(--bg) 58%) no-repeat,var(--bg);color:var(--tx);font:14.5px/1.45 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden;-webkit-text-size-adjust:100%}
+h1,h2,p{margin:0}svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+::-webkit-scrollbar{width:10px}::-webkit-scrollbar-thumb{background:#25323e;border-radius:99px;border:2px solid transparent;background-clip:content-box}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;height:60px;padding:0 14px;background:rgba(10,14,19,.86);backdrop-filter:blur(16px);border-bottom:1px solid var(--l);position:relative;z-index:50}
+.brand{display:flex;align-items:center;gap:9px}.brand i{width:26px;height:26px;border-radius:9px;display:grid;place-items:center;background:linear-gradient(155deg,var(--ac),#2b9b7b);color:var(--ai);font-size:12px;font-weight:800;font-style:normal}
+.brand h1{font-size:15px;font-weight:650;letter-spacing:-.2px;white-space:nowrap}
+.status{flex:1 1 130px;min-width:0;font-size:11.5px;color:var(--di);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.status b{color:var(--tx);font-variant-numeric:tabular-nums}
+#diag{font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;padding:3px 8px;border-radius:99px;border:1px solid var(--l2);color:var(--mu)}
+#diag.ok{border-color:rgba(79,209,165,.45);color:var(--ac);background:var(--as)}
+#diag.bad{border-color:rgba(239,123,123,.5);color:var(--e);background:rgba(239,123,123,.1)}
+.seg{display:flex;gap:3px;background:var(--s);border:1px solid var(--l);border-radius:99px;padding:3px}
+.seg button{border:0;background:transparent;color:var(--mu);padding:6px 14px;border-radius:99px;font-size:12.5px;font-weight:600;cursor:pointer}
+.seg button:hover{color:var(--tx)}.seg button.active{background:var(--as);color:var(--ac)}
+input,select,button{font:inherit;color:var(--tx);background:var(--s2);border:1px solid var(--l);border-radius:10px;padding:9px 11px;min-width:0}
+select{appearance:none;padding-right:30px;cursor:pointer;background-image:linear-gradient(45deg,transparent 50%,var(--di) 50%),linear-gradient(135deg,var(--di) 50%,transparent 50%);background-position:calc(100% - 16px) 52%,calc(100% - 11px) 52%;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+input::placeholder{color:var(--di)}
+button{cursor:pointer;transition:.15s}button:hover{border-color:var(--l2);background:var(--s3)}
+button:disabled{opacity:.42;cursor:default}
+.btn{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:7px 11px;color:var(--mu)}
+.btn:hover{color:var(--tx)}.btn.ico{padding:7px 9px}
+.btn.primary{background:linear-gradient(160deg,var(--ac),#2fa383);border-color:transparent;color:var(--ai)}
+.btn.primary:hover{filter:brightness(1.07);color:var(--ai)}
+.btn.on{background:var(--as);border-color:rgba(79,209,165,.4);color:var(--ac)}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px}.hidden{display:none!important}
+.app{display:grid;grid-template-columns:minmax(300px,348px) 1fr;height:calc(100dvh - 60px)}
+aside{background:var(--s);border-right:1px solid var(--l);display:flex;flex-direction:column;min-height:0}
+.pane{padding:11px 11px 0}.sw{position:relative}
+.sw svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--di)}
+#q{width:100%;padding-left:33px;background:var(--bg)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:7px}
+.g2 select,.g2 input{width:100%}.sp2{grid-column:1/-1}
+.fold{margin-top:7px}.fold summary{list-style:none;cursor:pointer;font-size:12px;color:var(--di);display:flex;align-items:center;gap:6px;padding:6px 2px;user-select:none}
+.fold summary::-webkit-details-marker{display:none}
+.fold summary::before{content:"›";font-size:15px;line-height:1;transition:.15s}
+.fold[open] summary::before{transform:rotate(90deg)}.fold summary:hover{color:var(--mu)}
+.lm{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--di);padding:10px 12px 7px;border-top:1px solid var(--l);margin-top:9px}
+#count{flex:1;font-weight:650;color:var(--mu);font-variant-numeric:tabular-nums}
+.lm label{display:flex;gap:5px;align-items:center;cursor:pointer}
+.lm input[type=checkbox]{width:13px;height:13px;accent-color:var(--ac);padding:0}
+.mini{font-size:11px;padding:4px 8px;background:transparent;color:var(--di);border-color:transparent}
+.mini:hover{background:var(--s2);color:var(--tx)}
+#list{flex:1;min-height:0;overflow-y:auto;padding:0 9px 14px}
+.card{width:100%;display:flex;gap:9px;text-align:left;align-items:stretch;padding:8px;margin:0 0 6px;background:var(--s2);border:1px solid var(--l);border-radius:12px;position:relative;overflow:hidden;content-visibility:auto;contain-intrinsic-size:74px}
+.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:transparent}
+.card:hover{background:var(--s3);border-color:var(--l2)}
+.card.active{background:#172e2c;border-color:rgba(79,209,165,.4)}.card.active::before{background:var(--ac)}
+.thumb{flex:0 0 84px;height:56px;border-radius:9px;background:#06090d;overflow:hidden;display:grid;place-items:center;color:var(--di);font-size:16px;border:1px solid var(--l)}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.cb{min-width:0;flex:1;display:flex;flex-direction:column;justify-content:center;gap:3px}
+.card strong{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card small{font-size:11.5px;color:var(--di);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chips{display:flex;gap:4px;flex-wrap:wrap}
+.chip{border:1px solid var(--l);border-radius:6px;padding:1px 6px;font-size:10px;font-weight:650;color:var(--di);white-space:nowrap;text-transform:uppercase}
+.chip.live{border-color:rgba(79,209,165,.4);background:var(--as);color:var(--ac)}
+.chip.err{border-color:rgba(239,123,123,.4);color:var(--e)}.chip.d{text-transform:none;color:var(--mu)}
+main{padding:14px 16px 30px;min-width:0;overflow-y:auto;display:flex;flex-direction:column;gap:11px}
+#banner{padding:9px 12px;border:1px solid rgba(239,123,123,.35);border-radius:10px;background:rgba(239,123,123,.09);color:#f2a6a6;font-size:12.5px;line-height:1.55}
+.meta{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;background:var(--s);border:1px solid var(--l);border-radius:var(--r);padding:11px 13px}
+#camTitle{font-size:16px;font-weight:650;word-break:break-word}
+#camInfo{font-size:12px;color:var(--di);margin-top:3px}
+#camChips{display:flex;gap:5px;flex-wrap:wrap}
+.tb{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.grow{flex:1}
+.auto{display:flex;gap:6px;align-items:center;font-size:11.5px;color:var(--di)}
+.auto select{padding:5px 26px 5px 9px;font-size:11.5px;background-color:transparent}
+.viewer{width:100%;height:min(64vh,700px);min-height:250px;background:#05080b;border:1px solid var(--l);border-radius:var(--r);overflow:hidden;position:relative;box-shadow:0 10px 34px rgba(0,0,0,.5)}
+.viewer img,.viewer video,.viewer iframe{width:100%;height:100%;display:block;border:0;background:#05080b;object-fit:contain}
+#overlay{position:absolute;inset:0;display:flex;flex-direction:column;gap:11px;align-items:center;justify-content:center;text-align:center;padding:26px;color:var(--mu);background:rgba(5,8,11,.84);font-size:13px;line-height:1.6}
+#overlay.err{color:#f0a3a3}
+#overlay a{color:var(--ac);font-weight:600;text-decoration:none;border-bottom:1px solid rgba(79,209,165,.4)}
+.spin{width:26px;height:26px;border:2.5px solid rgba(255,255,255,.12);border-top-color:var(--ac);border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.note{font-size:11.5px;color:var(--di);line-height:1.6}.note.warn{color:var(--w)}
+#resList a{color:var(--ac)}
+.cust{border:1px solid var(--l);border-radius:var(--r);padding:9px 12px;background:var(--s)}
+.cust summary{cursor:pointer;font-size:12.5px;font-weight:600;color:var(--mu);list-style:none}
+.cust summary::-webkit-details-marker{display:none}
+.cust form{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:9px}
+.skel{height:58px;border-radius:12px;margin-bottom:6px;background:linear-gradient(90deg,#161e28,#1d2833,#161e28);background-size:200% 100%;animation:sk 1.1s linear infinite}
+@keyframes sk{to{background-position:-200% 0}}
+.srcs{border:1px solid var(--l);border-radius:var(--r);background:var(--bg);margin-top:8px}
+.srcs summary{list-style:none;cursor:pointer;font-size:12.5px;font-weight:600;padding:9px 11px;color:var(--mu)}
+.srcs summary::-webkit-details-marker{display:none}
+#srcList{padding:0 8px 8px;display:flex;flex-direction:column;gap:1px;max-height:210px;overflow-y:auto}
+.sr{display:flex;gap:7px;align-items:center;font-size:11.5px;color:var(--mu);cursor:pointer;padding:5px 3px;border-radius:7px}
+.sr:hover{background:var(--s2)}.sr input{width:13px;height:13px;accent-color:var(--ac);padding:0}
+.srn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.src{color:var(--ac);font-weight:650}.src.e{color:var(--e)}
+#viewerPanel{display:block}
+#mapPanel{display:none;position:relative;height:calc(100dvh - 60px);overflow:hidden}
+#cameraMap{position:absolute;inset:0;background:#0e151d}
+.leaflet-container{font:inherit;background:#0e151d}
+.leaflet-popup-content-wrapper{background:var(--s2);color:var(--tx);border:1px solid var(--l2);border-radius:12px}
+.leaflet-popup-tip{background:var(--s2)}.leaflet-popup-content{margin:11px 13px;font-size:12.5px}
+.mp b{display:block;font-size:13px;margin-bottom:3px}.mp small{display:block;color:var(--di);margin-bottom:8px}
+.mp img{display:block;width:100%;max-width:220px;border-radius:8px;margin-bottom:8px;background:#000}
+.mp button{padding:5px 9px;font-size:11.5px;border-radius:7px;background:var(--as);border-color:rgba(79,209,165,.4);color:var(--ac);font-weight:650}
+.mlg{position:absolute;z-index:800;left:12px;bottom:12px;display:flex;gap:12px;background:rgba(10,14,19,.9);border:1px solid var(--l);border-radius:99px;padding:7px 13px;font-size:11px;color:var(--mu);pointer-events:none}
+.mlg i{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:middle}
+.mct{position:absolute;z-index:800;right:12px;bottom:12px;background:rgba(10,14,19,.9);border:1px solid var(--l);border-radius:99px;padding:7px 13px;font-size:11px;color:var(--mu)}
+.mfail{position:absolute;inset:0;display:grid;place-items:center;padding:26px;text-align:center;color:var(--mu);font-size:13px;line-height:1.6}
+@media(max-width:880px){body{overflow:auto}.app{display:flex;flex-direction:column;height:auto}main{order:1;overflow:visible;padding:11px}aside{order:2;border-right:0;border-top:1px solid var(--l)}#list{overflow:visible}.viewer{height:46vh;min-height:210px}.top{position:sticky;top:0;height:auto;padding:9px 11px}.seg{order:3;width:100%;justify-content:center}#mapPanel{height:70vh}}
+@media(max-width:520px){.g2{grid-template-columns:1fr}.cust form{grid-template-columns:1fr}.thumb{flex-basis:70px;height:52px}}
+</style>
 </head>
 <body>
 <header class="top">
- <div class="brand"><span class="dot">◉</span><h1>CapyCámaras</h1></div>
- <p id="statusLine" class="status" role="status" aria-live="polite">Iniciando…</p>
- <div class="segmented" role="tablist" aria-label="Vista">
+ <div class="brand"><i>◉</i><h1>CapyCámaras</h1></div>
+ <span id="diag">Iniciando…</span>
+ <p id="statusLine" class="status" role="status" aria-live="polite"></p>
+ <div class="seg" role="tablist">
   <button id="tabViewer" class="active" type="button" role="tab" aria-selected="true">Visor</button>
   <button id="tabMap" type="button" role="tab" aria-selected="false">Mapa</button>
  </div>
- <button id="btnCatalog" class="btn primary" title="Volver a consultar los catálogos">⟳ Actualizar</button>
+ <button id="btnCatalog" class="btn primary">⟳ Actualizar</button>
 </header>
-
-<div id="viewerPanel">
-<div class="app">
+<div id="viewerPanel"><div class="app">
 <aside>
  <div class="pane">
-  <div class="searchWrap">
-   <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
-   <input id="q" type="search" placeholder="Municipio, carretera, provincia, nombre…" aria-label="Buscar">
+  <div class="sw"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="q" type="search" placeholder="Municipio, carretera, provincia, nombre…" aria-label="Buscar"></div>
+  <div class="g2">
+   <select id="fKind" aria-label="Tipo"><option value="">Todos los tipos</option><option value="img">Imagen / cámara</option><option value="video">Vídeo en directo</option><option value="liveimg">Municipal actualizada</option><option value="portal">Portal externo</option></select>
+   <select id="fDist" aria-label="Distancia"><option value="0">Cualquier distancia</option><option value="10">≤ 10 km</option><option value="25">≤ 25 km</option><option value="50">≤ 50 km</option><option value="100">≤ 100 km</option></select>
+   <select id="fZone" class="sp2" aria-label="Zona"><option value="">Todas las zonas</option></select>
+   <select id="fOrg" aria-label="Organismo"><option value="">Todos los organismos</option></select>
+   <select id="fProv" aria-label="Provincia"><option value="">Todas las provincias</option></select>
+   <select id="fTown" aria-label="Localidad"><option value="">Todas las localidades</option></select>
+   <select id="fRoad" aria-label="Carretera"><option value="">Todas las carreteras</option></select>
+   <select id="fSort" class="sp2" aria-label="Orden"><option value="dist">Más cerca de Paiporta</option><option value="road">Carretera y punto km</option><option value="town">Localidad</option></select>
   </div>
-  <div class="row2">
-   <select id="fKind" aria-label="Tipo de cámara">
-    <option value="">Todos los tipos</option>
-    <option value="img">Imagen / cámara</option>
-    <option value="video">Vídeo en directo</option>
-    <option value="liveimg">Cámara municipal actualizada</option>
-    <option value="portal">Portal externo</option>
-   </select>
-   <select id="fDist" aria-label="Distancia máxima a Paiporta">
-    <option value="0">Cualquier distancia</option>
-    <option value="10">≤ 10 km</option>
-    <option value="25">≤ 25 km</option>
-    <option value="50">≤ 50 km</option>
-    <option value="100">≤ 100 km</option>
-   </select>
-   <select id="fZone" class="span2" aria-label="Zona / país"></select>
-  </div>
-  <details class="fold">
-   <summary>Más filtros</summary>
-   <div class="row2">
-    <select id="fOrg" aria-label="Organismo"></select>
-    <select id="fProv" aria-label="Provincia"></select>
-    <select id="fTown" aria-label="Localidad"></select>
-    <select id="fRoad" aria-label="Carretera"></select>
-    <select id="fSort" class="span2" aria-label="Ordenar">
-     <option value="dist">Más cerca de Paiporta</option>
-     <option value="road">Carretera y punto km</option>
-     <option value="town">Localidad</option>
-    </select>
-   </div>
-  </details>
-  <details class="fold sources">
-   <summary>🌍 Fuentes mundiales</summary>
-   <div id="srcList" class="srcList"></div>
-   <p class="srcNote">Catálogos públicos de acceso libre. Se descargan solo al marcar la casilla.</p>
-  </details>
+  <details class="srcs"><summary>🌍 Fuentes mundiales</summary><div id="srcList"></div></details>
  </div>
- <div class="listMeta">
-  <span id="count">0 cámaras</span>
-  <label><input id="thumbs" type="checkbox" checked> Miniaturas</label>
-  <button id="btnReset" class="mini">Limpiar</button>
- </div>
- <div id="list" aria-label="Lista de cámaras"></div>
+ <div class="lm"><span id="count">0 cámaras</span><label><input id="thumbs" type="checkbox" checked> Miniaturas</label><button id="btnReset" class="mini">Limpiar</button></div>
+ <div id="list" aria-label="Cámaras"></div>
 </aside>
-
 <main>
- <div id="banner" class="banner hidden"></div>
- <div class="metaCard">
-  <div class="metaText">
-   <h2 id="camTitle">Selecciona una cámara</h2>
-   <p id="camInfo">Elige una cámara de la lista o del mapa.</p>
-  </div>
-  <div id="camChips" class="chips"></div>
- </div>
-
- <div class="toolbar">
-  <button id="btnReload" class="btn ico" title="Recargar imagen">↻</button>
+ <div id="banner" class="hidden"></div>
+ <div class="meta"><div><h2 id="camTitle">Selecciona una cámara</h2><p id="camInfo">Elige una cámara de la lista o del mapa.</p></div><div id="camChips" class="chips"></div></div>
+ <div class="tb">
+  <button id="btnReload" class="btn ico">↻</button>
   <button id="btnOpen" class="btn">Abrir fuente</button>
   <button id="btnMap" class="btn">Ver en mapa</button>
-  <button id="btnFull" class="btn ico" title="Pantalla completa">⛶</button>
+  <button id="btnFull" class="btn ico">⛶</button>
   <button id="btnDel" class="btn hidden">Quitar</button>
   <span class="grow"></span>
-  <div class="auto">
-   <select id="autoInt" aria-label="Intervalo de actualización">
-    <option value="0">Sin auto</option>
-    <option value="60">1 min</option>
-    <option value="120">2 min</option>
-    <option value="300" selected>5 min</option>
-    <option value="600">10 min</option>
-    <option value="1800">30 min</option>
-   </select>
-   <button id="btnPause" class="btn ico" title="Pausar">⏸</button>
-   <span id="countdown" class="countdown"></span>
-  </div>
+  <div class="auto"><select id="autoInt" aria-label="Auto"><option value="0">Sin auto</option><option value="60">1 min</option><option value="120">2 min</option><option value="300" selected>5 min</option><option value="600">10 min</option></select><button id="btnPause" class="btn ico">⏸</button><span id="countdown"></span></div>
  </div>
-
  <div class="viewer" id="viewer">
-  <img id="still" class="media hidden" alt="Imagen actual de la cámara" referrerpolicy="no-referrer">
+  <img id="still" class="hidden" alt="Imagen de la cámara" referrerpolicy="no-referrer">
   <video id="video" class="hidden" controls muted playsinline></video>
-  <iframe id="frame" class="hidden" title="Fuente incrustada" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="no-referrer"></iframe>
-  <div id="overlay" class="overlay"><span>Selecciona una cámara de la lista.</span></div>
+  <iframe id="frame" class="hidden" title="Fuente" allow="autoplay;fullscreen;picture-in-picture" allowfullscreen referrerpolicy="no-referrer"></iframe>
+  <div id="overlay"><span>Selecciona una cámara de la lista.</span></div>
  </div>
-
- <p id="viewNote" class="note"></p>
+ <p class="note" id="viewNote"></p>
  <div id="resList" class="note"></div>
-
- <details class="custom">
-  <summary>＋ Añadir una cámara propia</summary>
+ <details class="cust"><summary>＋ Añadir una cámara propia</summary>
   <form id="addForm">
-   <input class="span2" id="cName" placeholder="Nombre" required maxlength="80">
-   <input class="span2" id="cUrl" type="url" placeholder="https://…" required>
-   <select id="cType" aria-label="Formato">
-    <option value="img">Imagen fija (JPEG/PNG)</option>
-    <option value="mjpeg">Vídeo MJPEG</option>
-    <option value="hls">Vídeo HLS (.m3u8)</option>
-    <option value="video">Vídeo MP4/WebM</option>
-    <option value="iframe">Página incrustable</option>
-   </select>
+   <input class="sp2" id="cName" placeholder="Nombre" required maxlength="80">
+   <input class="sp2" id="cUrl" type="url" placeholder="https://…" required>
+   <select id="cType"><option value="img">Imagen fija</option><option value="mjpeg">MJPEG</option><option value="hls">HLS</option><option value="video">Vídeo</option><option value="iframe">Página</option></select>
    <input id="cTown" placeholder="Localidad (opcional)" maxlength="60">
-   <button class="btn primary span2" type="submit">Guardar cámara</button>
+   <button class="btn primary sp2" type="submit">Guardar</button>
   </form>
-  <p class="note">Solo fuentes públicas cuyo uso esté permitido. Se guardan en este navegador.</p>
  </details>
-
- <p class="note">La DGT publica fotogramas fijos, no vídeo continuo. Las cámaras municipales de València se publican como página: se incrustan y, si hay imagen directa, se carga sola. Cuando un proveedor bloquea la inserción, la ficha se conserva con el enlace para abrirla fuera.</p>
+ <p class="note">La DGT publica fotogramas fijos, no vídeo. Las cámaras de València se incrustan como página. Si un proveedor bloquea la inserción, usa «Abrir fuente».</p>
 </main>
+</div></div>
+<div id="mapPanel"><div id="cameraMap"></div>
+ <div class="mlg"><span><i style="background:#35b86b"></i>DGT</span><span><i style="background:#e8b64c"></i>Municipal</span><span><i style="background:#9b6cff"></i>Otras</span></div>
+ <div id="mapCount" class="mct"></div>
 </div>
-</div>
+<script>
+'use strict';
+var diag=document.getElementById('diag');
+diag.textContent='JS activo';diag.className='ok';
+var REF={lat:39.4278,lon:-0.4169};
+var DGT='https://services1.arcgis.com/nCKYwcSONQTkPA4K/arcgis/rest/services/CamarasDGT/FeatureServer/0/query';
+var VLAY='https://geoportal.valencia.es/server/rest/services/OPENDATA/Trafico/MapServer/190/query';
+var VVIS='https://camaras.valencia.es/camaras/visualizador.html?id=';
+var PROXY='https://images.weserv.nl/?url=';
+var PROV={'01':'Álava','02':'Albacete','03':'Alicante','04':'Almería','05':'Ávila','06':'Badajoz','07':'Illes Balears','08':'Barcelona','09':'Burgos','10':'Cáceres','11':'Cádiz','12':'Castellón','13':'Ciudad Real','14':'Córdoba','15':'A Coruña','16':'Cuenca','17':'Girona','18':'Granada','19':'Guadalajara','20':'Gipuzkoa','21':'Huelva','22':'Huesca','23':'Jaén','24':'León','25':'Lleida','26':'La Rioja','27':'Lugo','28':'Madrid','29':'Málaga','30':'Murcia','31':'Navarra','32':'Ourense','33':'Asturias','34':'Palencia','35':'Las Palmas','36':'Pontevedra','37':'Salamanca','38':'Santa Cruz de Tenerife','39':'Cantabria','40':'Segovia','41':'Sevilla','42':'Soria','43':'Tarragona','44':'Teruel','45':'Toledo','46':'València','47':'Valladolid','48':'Bizkaia','49':'Zamora','50':'Zaragoza','51':'Ceuta','52':'Melilla'};
+var KL={img:'Imagen fija',mjpeg:'MJPEG',hls:'HLS',video:'Vídeo',iframe:'Página',portal:'Portal'};
+var PORTALS=[
+{uid:'p-dgt',name:'DGT · portal de cámaras',town:'España',prov:'',org:'DGT',url:'https://www.dgt.es/conoce-el-estado-del-trafico/camaras-de-trafico/',desc:'Portal oficial de la DGT.'},
+{uid:'p-avamet',name:'AVAMET · webcams',town:'Comunitat Valenciana',prov:'',org:'AVAMET',url:'https://www.avamet.org/mxo-webcams.php',desc:'Webcams de la red AVAMET.'},
+{uid:'p-cv',name:'Webcams Comunitat Valenciana',town:'Comunitat Valenciana',prov:'',org:'Generalitat',url:'https://www.comunitatvalenciana.com/es/webcams',desc:'Webcams de playas y localidades.'},
+{uid:'p-vlc',name:'València · València al minut',town:'València',prov:'46',org:'Ajuntament de València',url:'https://www.valencia.es/valenciaalminut/',desc:'Cuadro de mando municipal.'},
+{uid:'p-torrent',name:'Torrent · GeoTransit',town:'Torrent',prov:'46',org:'Ajuntament de Torrent',url:'https://geotransit.torrent.es/',desc:'Portal municipal.'}
+].map(function(p){p.kind='portal';p.road='';p.pk=null;p.dir='';p.lat=null;p.lon=null;p.img='';p.src=p.url;return p});
+var SOURCES=[
+{id:'fi',zone:'Finlandia',org:'Fintraffic (Finlandia)',url:'https://tie.digitraffic.fi/api/weathercam/v1/stations',parse:function(j){var o=[];(j.features||[]).forEach(function(f){var g=f.geometry&&f.geometry.coordinates,p=f.properties||{};if(!g)return;(p.presets||[]).forEach(function(pr){if(pr&&pr.id)o.push({id:pr.id,name:(p.name||'Cámara')+' · '+pr.id,lat:+g[1],lon:+g[0],img:'https://weathercam.digitraffic.fi/'+pr.id+'.jpg',desc:'Cámara meteorológica (Fintraffic).'})})});return o}},
+{id:'lon',zone:'Reino Unido',org:'Transport for London',url:'https://api.tfl.gov.uk/Place/Type/JamCams',parse:function(j){var o=[],a=Array.isArray(j)?j:(j.places||[]);a.forEach(function(p){var ap=p.additionalProperties||{},img=safeUrl(ap.imageUrl||'')||(p.id?'https://s3-eu-west-1.amazonaws.com/jamcams.tfl.gov.uk/'+p.id+'.jpg':'');if(img)o.push({id:p.id||img,name:p.commonName||'JamCam',lat:+p.lat,lon:+p.lon,img:img,desc:'Transport for London.'})});return o}}
+];
+var dgtCams=[],vlcCams=[],customCams=[],extraCams=[],all=[],filtered=[],shown=0;
+var selected=null,token=0,paused=false,nextAt=0,catalogLoading=false,activeCard=null;
+var map=null,markers=new Map(),mapReady=false,mapPromise=null,io=null,repaint=null,mapTimer=null,hls=null,munT=null;
+function $(i){return document.getElementById(i)}
+var E={};
+['q','fOrg','fKind','fZone','fProv','fTown','fRoad','fDist','fSort','list','count','thumbs','still','video','frame','overlay','camTitle','camInfo','camChips','viewNote','resList','banner','statusLine','autoInt','btnPause','countdown','srcList','mapCount','diag'].forEach(function(k){E[k]=$(k)});
+function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
+function norm(s){return String(s==null?'':s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}
+function safeUrl(u){try{var x=new URL(u,location.href);return /^https?:$/.test(x.protocol)?x.href:''}catch(e){return ''}}
+function bust(u){try{var x=new URL(u);x.searchParams.set('_t',Date.now());return x.href}catch(e){return u}}
+function fetchT(u,ms){var c=new AbortController(),t=setTimeout(function(){c.abort()},ms);return fetch(u,{signal:c.signal}).finally(function(){clearTimeout(t)})}
+function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+function esc(s){return String(s==null?'':s).replace(/[<>&"]/g,function(m){return{'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[m]})}
+function mun(c){return !!(c&&c.municipal)}
+function live(c){return !!(c&&(c.kind==='mjpeg'||c.kind==='hls'||c.kind==='video'||mun(c)))}
+function dist(a,b,c,d){var R=6371,r=Math.PI/180,dl=(c-a)*r,dn=(d-b)*r,h=Math.sin(dl/2)*Math.sin(dl/2)+Math.cos(a*r)*Math.cos(c*r)*Math.sin(dn/2)*Math.sin(dn/2);return 2*R*Math.asin(Math.sqrt(h))}
+function proxy(u){try{var x=new URL(u);return PROXY+encodeURIComponent(x.host+x.pathname+x.search)}catch(e){return ''}}
+function cands(u){u=String(u||'').trim();if(!u)return[];var d=[];if(u.indexOf('http://')===0){d.push('https://'+u.slice(7));d.push(u)}else d.push(u);return d.concat(d.map(proxy).filter(Boolean)).filter(safeUrl)}
 
-<div id="mapPanel" aria-label="Mapa de cámaras">
- <div id="cameraMap"></div>
- <div class="mapLegend">
-  <span><i style="background:#35b86b"></i>DGT</span>
-  <span><i style="background:#e8b64c"></i>Municipal</span>
-  <span><i style="background:#9b6cff"></i>Otras</span>
- </div>
- <div id="mapCount" class="mapCount"></div>
-</div>
+function classify(u){u=safeUrl(u);if(!u)return null;var l=u.toLowerCase().split('#')[0],p=l.split('?')[0];
+if(/\.m3u8$/.test(p))return 'hls';if(/\.(mp4|webm|ogg)$/.test(p))return 'video';
+if(/mjpeg|multipart|motion\.cgi|stream\.cgi/.test(p))return 'mjpeg';
+if(/\.(jpe?g|png|webp|gif|avif)$/.test(p))return 'img';
+if(/\.(html?|php|aspx?|jsp)$/.test(p))return 'iframe';
+if(/visualizador|embed|player|visor/.test(l))return 'iframe';
+return 'iframe'}
 
-<noscript>
- <div class="noscript">Sin JavaScript no se pueden cargar los catálogos. Actívalo y recarga.</div>
-</noscript>
+function loadDGT(onBatch){
+ var fields='OBJECTID,id,carretera,pk,sentido,provincia,imagen,latitud,longitud,NAMEUNIT,codine',t0=Date.now(),off=0,g=0,tot=0,noImg=0;
+ function step(){
+  if(g++>12||Date.now()-t0>45000)return Promise.resolve({total:tot,noImg:noImg});
+  var size=g===1?250:1000;
+  var qs='where=1%3D1&outFields='+encodeURIComponent(fields)+'&returnGeometry=false&orderByFields=OBJECTID&resultOffset='+off+'&resultRecordCount='+size+'&f=json';
+  return fetchT(DGT+'?'+qs,12000).then(function(r){
+   if(!r.ok)throw new Error('HTTP '+r.status);
+   return r.json();
+  }).then(function(j){
+   if(j.error)throw new Error(j.error.message||'ArcGIS');
+   var batch=[];
+   (j.features||[]).forEach(function(f){
+    var a={};for(var k in f.attributes)a[k.toLowerCase()]=f.attributes[k];
+    tot++;var img=String(a.imagen||'').trim();if(!img){noImg++;return}
+    var code=a.codine?String(a.codine).slice(0,2):(a.provincia!=null?String(a.provincia).padStart(2,'0'):'');
+    var la=+a.latitud,lo=+a.longitud,ok=isFinite(la)&&isFinite(lo)&&la!==0;
+    var rd=String(a.carretera||'').trim(),pk=(a.pk!=null&&isFinite(+a.pk))?+a.pk:null,di=String(a.sentido||'').trim();
+    batch.push({uid:'dgt-'+(a.id!=null?a.id:a.objectid),kind:'img',org:'DGT',road:rd,pk:pk,dir:di,name:(rd||'Cámara DGT')+(pk!=null?' · km '+pk:'')+(di?' · '+di:''),town:String(a.nameunit||'').trim(),prov:code,zone:'España',lat:ok?la:null,lon:ok?lo:null,img:img,src:img,desc:'Cámara de la DGT.'});
+   });
+   if(batch.length)onBatch(batch);
+   if(!(j.exceededTransferLimit&&j.features.length))return {total:tot,noImg:noImg};
+   off+=j.features.length;return step();
+  });
+ }
+ return step();
+}
+
+function loadVLC(){
+ return fetchT(VLAY+'?where=1%3D1&outFields=objectid,idcamara,descripcio,url&returnGeometry=true&outSR=4326&f=geojson&resultRecordCount=2000',12000).then(function(r){
+  if(!r.ok)throw new Error('HTTP '+r.status);return r.json();
+ }).then(function(j){
+  var out=[],seen={};
+  (j.features||[]).forEach(function(f){
+   var p=f.properties||{},g=f.geometry&&f.geometry.coordinates;
+   var id=String(p.idcamara||p.objectid||'');if(!id||seen[id])return;seen[id]=1;
+   var url=safeUrl(p.url||'')||(VVIS+encodeURIComponent(id));
+   out.push({uid:'vlc-'+id,kind:classify(url),org:'Ajuntament de València',road:'',pk:null,dir:'',prov:'46',zone:'España',name:p.descripcio||('Cámara València '+id),town:'València',lat:g?+g[1]:null,lon:g?+g[0]:null,img:url,src:url,municipal:true,imgGuess:'https://camaras.valencia.es/camaras/img/'+id.replace(/\D/g,'')+'.jpg',desc:'Fuente municipal de tráfico.'});
+  });
+  return out;
+ }).catch(function(){return []});
+}
+
+function paint(){clearTimeout(repaint);repaint=setTimeout(function(){rebuild();status()},350)}
+function loadAll(){
+ if(catalogLoading)return;catalogLoading=true;E.banner.classList.add('hidden');status();
+ loadVLC().then(function(v){vlcCams=v;paint()});
+ loadDGT(function(b){dgtCams=dgtCams.concat(b);paint()}).then(function(r){
+  catalogLoading=false;paint();status(r.total+' registros, '+r.noImg+' sin imagen');
+ }).catch(function(e){
+  catalogLoading=false;paint();
+  var m=(e&&e.name==='AbortError')?'tiempo agotado':(e&&e.message)||'error';
+  E.banner.textContent='No se pudo consultar la DGT ('+m+'). Los portales y las fuentes mundiales siguen disponibles.';
+  E.banner.classList.remove('hidden');status();
+ });
+}
+
+function rebuild(){
+ var m={},i;
+ var pool=dgtCams.concat(vlcCams,customCams,extraCams,PORTALS);
+ for(i=0;i<pool.length;i++){var c=pool[i];if(c&&c.uid&&!m[c.uid])m[c.uid]=c}
+ all=Object.keys(m).map(function(k){return m[k]});
+ var orgs={},zones={},provs={},towns={},roads={};
+ all.forEach(function(c){
+  c._d=(c.lat!=null&&c.lon!=null)?dist(REF.lat,REF.lon,c.lat,c.lon):null;
+  c._h=norm([c.name,c.town,c.road,c.dir,c.zone,PROV[c.prov]||'',c.org,c.desc].join(' '));
+  if(c.org)orgs[c.org]=1;if(c.zone)zones[c.zone]=1;if(c.prov)provs[c.prov]=1;
+  if(c.kind!=='portal'){if(c.town)towns[c.town]=1;if(c.road)roads[c.road]=1}
+ });
+ fill(E.fOrg,'Todos los organismos',Object.keys(orgs).sort(),E.fOrg.value);
+ fill(E.fZone,'Todas las zonas',Object.keys(zones).sort(),E.fZone.value);
+ fill(E.fProv,'Todas las provincias',Object.keys(provs).sort(function(a,b){return(PROV[a]||a).localeCompare(PROV[b]||b)}),E.fProv.value,PROV);
+ fill(E.fTown,'Todas las localidades',Object.keys(towns).sort(),E.fTown.value);
+ fill(E.fRoad,'Todas las carreteras',Object.keys(roads).sort(),E.fRoad.value);
+ apply();
+}
+function fill(sel,label,vals,keep,mapv){
+ sel.innerHTML='';var o=el('option',null,label);o.value='';sel.appendChild(o);
+ var lim=Math.min(vals.length,220);
+ for(var i=0;i<lim;i++){var x=el('option',null,mapv?(mapv[vals[i]]||vals[i]):vals[i]);x.value=vals[i];sel.appendChild(x)}
+ if(vals.length>lim){var y=el('option',null,'… '+(vals.length-lim)+' más (usa la búsqueda)');y.value='';y.disabled=true;sel.appendChild(y)}
+ sel.value=vals.indexOf(keep)>=0?keep:'';
+}
+
+function apply(){
+ var q=norm(E.q.value.trim()),org=E.fOrg.value,kind=E.fKind.value,zone=E.fZone.value,prov=E.fProv.value,town=E.fTown.value,road=E.fRoad.value,maxd=+E.fDist.value||0,sort=E.fSort.value;
+ var terms=q?q.split(/\s+/):null;
+ filtered=[];
+ all.forEach(function(c){
+  if(org&&c.org!==org)return;
+  if(kind){if(kind==='video'){if(!(c.kind==='mjpeg'||c.kind==='hls'||c.kind==='video'))return}
+   else if(kind==='liveimg'){if(!mun(c))return}else if(c.kind!==kind)return}
+  if(zone&&c.zone!==zone)return;if(prov&&c.prov!==prov)return;
+  if(town&&c.town!==town)return;if(road&&c.road!==road)return;
+  if(maxd&&(c._d==null||c._d>maxd))return;
+  if(terms){for(var i=0;i<terms.length;i++)if(c._h.indexOf(terms[i])<0)return}
+  filtered.push(c);
+ });
+ var d=function(a,b){return(a._d==null?1e9:a._d)-(b._d==null?1e9:b._d)};
+ if(sort==='road')filtered.sort(function(a,b){return(a.road||'~').localeCompare(b.road||'~')||((a.pk||0)-(b.pk||0))});
+ else if(sort==='town')filtered.sort(function(a,b){return(a.town||'~').localeCompare(b.town||'~')||d(a,b)});
+ else filtered.sort(function(a,b){return(a.kind==='portal')-(b.kind==='portal')||d(a,b)});
+ shown=0;E.list.innerHTML='';E.list.scrollTop=0;activeCard=null;
+ E.count.textContent=filtered.length+(filtered.length===1?' cámara':' cámaras');
+ if(!filtered.length)E.list.appendChild(el('p','note',all.length?'Ninguna cámara coincide.':'Cargando…'));
+ else more();
+ mapRefresh();
+}
+function more(){
+ var end=Math.min(shown+60,filtered.length),fr=document.createDocumentFragment();
+ for(var i=shown;i<end;i++)fr.appendChild(card(filtered[i]));
+ shown=end;E.list.appendChild(fr);obs(fr);
+}
+function obs(fr){
+ if(!E.thumbs.checked)return;
+ var ns=[].slice.call(fr.querySelectorAll('.thumb[data-s]'));
+ if(!('IntersectionObserver' in window)){ns.forEach(thumb);return}
+ if(!io)io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){io.unobserve(e.target);thumb(e.target)}})},{root:E.list,rootMargin:'200px'});
+ ns.forEach(function(t){io.observe(t)});
+}
+function thumb(t){var u=t.getAttribute('data-s');t.removeAttribute('data-s');if(!u)return;var i=new Image();i.referrerPolicy='no-referrer';i.onload=function(){t.innerHTML='';t.appendChild(i)};i.onerror=function(){t.textContent='⚠'};i.src=u}
+function card(c){
+ var b=el('button','card'+(selected&&selected.uid===c.uid?' active':''));b.type='button';b.dataset.uid=c.uid;
+ var t=el('div','thumb',c.kind==='portal'?'◍':(c.kind==='img'?'▤':'▷'));
+ if(c.kind==='img'&&E.thumbs.checked){var cd=cands(c.img);if(cd.length)t.setAttribute('data-s',cd[0])}
+ var body=el('div','cb');
+ body.appendChild(el('strong',null,c.name));
+ body.appendChild(el('small',null,[c.town,c.zone||PROV[c.prov]].filter(Boolean).join(' · ')||c.desc||''));
+ var ch=el('div','chips');ch.appendChild(el('span','chip',c.org));
+ ch.appendChild(el('span','chip'+(live(c)?' live':''),mun(c)?'Municipal':KL[c.kind]));
+ if(c._d!=null)ch.appendChild(el('span','chip d',c._d<10?c._d.toFixed(1)+' km':Math.round(c._d)+' km'));
+ body.appendChild(ch);b.append(t,body);
+ b.onclick=function(){pick(c,b,true)};
+ return b;
+}
+
+function overlay(mode,msg,link,prox){
+ var o=E.overlay;o.innerHTML='';o.className='';
+ if(mode==='none'){o.className='hidden';return}
+ if(mode==='load'){o.appendChild(el('div','spin'));o.appendChild(el('span',null,msg||'Cargando…'));return}
+ if(mode==='err')o.className='err';
+ o.appendChild(el('span',null,msg));
+ if(link){var a=el('a',null,'Abrir la fuente');a.href=link;a.target='_blank';a.rel='noopener noreferrer';o.appendChild(a)}
+ if(prox){var b=el('button','btn','Reintentar con proxy');b.onclick=function(){if(selected)show(selected,true,token,true)};o.appendChild(b)}
+}
+function clearMedia(){
+ E.still.className='hidden';E.video.className='hidden';E.frame.className='hidden';
+ E.still.onload=null;E.still.onerror=null;E.still.removeAttribute('src');
+ try{E.video.pause()}catch(e){}
+ if(hls){try{hls.destroy()}catch(e){}hls=null}
+ E.video.removeAttribute('src');try{E.video.load()}catch(e){}
+ E.frame.onload=null;E.frame.src='about:blank';clearTimeout(munT);
+}
+function pick(c,cardEl,scroll){
+ selected=c;token++;clearMedia();E.resList.innerHTML='';E.viewNote.textContent='';E.viewNote.className='note';
+ E.camTitle.textContent=c.name;
+ var bits=[];if(c.town)bits.push(c.town);if(c.zone)bits.push(c.zone);
+ if(c.prov&&PROV[c.prov])bits.push(PROV[c.prov]);
+ if(c.road)bits.push(c.road+(c.pk!=null?' km '+c.pk:''));
+ bits.push('Fuente: '+c.org);
+ E.camInfo.textContent=bits.join(' · ')+(c.desc&&c.kind!=='img'?' — '+c.desc:'');
+ E.camChips.innerHTML='';E.camChips.appendChild(el('span','chip'+(live(c)?' live':''),mun(c)?'Municipal':KL[c.kind]));
+ $('btnDel').classList.toggle('hidden',!c.custom);
+ $('btnMap').disabled=c.lat==null;
+ $('btnReload').disabled=c.kind==='portal';
+ if(activeCard)activeCard.classList.remove('active');
+ if(cardEl){activeCard=cardEl;cardEl.classList.add('active')}
+ show(c,false);reset();
+ if(scroll&&innerWidth<880)E.camTitle.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function show(c,refresh,tok,fp){
+ if(c.kind==='img')return img(c,refresh,tok,fp);
+ if(c.kind==='mjpeg')return mjpeg(c,tok);
+ if(c.kind==='hls'||c.kind==='video')return vid(c,tok);
+ if(c.kind==='iframe'){frame(c,tok);if(mun(c))guess(c,tok);return}
+ portal(c,tok);
+}
+function guess(c,tok){if(!c.imgGuess)return;var p=new Image();p.onload=function(){if(tok!==token||!p.naturalWidth)return;c.kind='img';c.img=c.imgGuess;c.src=c.imgGuess;img(c,false,tok)};p.src=c.imgGuess}
+function img(c,refresh,tok,fp){
+ var list=cands(c.img);
+ if(fp)list=list.filter(function(u){return u.indexOf(PROXY)===0});
+ if(!list.length){overlay('err','Esta cámara no tiene una URL válida.',null,!!c.img);return}
+ E.video.className='hidden';E.frame.className='hidden';
+ if(!refresh)overlay('load','Cargando imagen…');
+ var i=0;
+ (function next(){
+  if(tok!==token)return;
+  if(i>=list.length){E.still.className='hidden';overlay('err','No se pudo cargar la imagen. Puede estar caída, bloqueada o rota.',c.src,true);markErr(c);return}
+  var base=list[i++],u=refresh?bust(base):base,done=false,p=new Image();
+  var tm=setTimeout(fail,9000);
+  function fail(){if(done)return;done=true;clearTimeout(tm);next()}
+  p.referrerPolicy='no-referrer';
+  p.onload=function(){
+   if(done)return;done=true;clearTimeout(tm);
+   if(tok!==token||!p.naturalWidth)return;
+   E.still.src=p.src;E.still.className='';overlay('none');
+   clearTimeout(munT);
+   if(mun(c)){E.viewNote.textContent='Cámara municipal: actualizada cada 5 s.';munT=setTimeout(function(){if(tok===token&&!document.hidden&&!paused)img(c,true,tok,fp)},5000)}
+   else E.viewNote.textContent='Imagen cargada a las '+new Date().toLocaleTimeString('es-ES')+'.';
+  };
+  p.onerror=fail;p.src=u;
+ })();
+}
+function markErr(c){var b=E.list.querySelector('.card[data-uid="'+c.uid+'"] .chips');if(b&&!b.querySelector('.chip.err'))b.appendChild(el('span','chip err','sin imagen'))}
+function mjpeg(c,tok){
+ var u=safeUrl(c.img);if(!u){overlay('err','URL no válida.',null);return}
+ overlay('load','Conectando con el flujo MJPEG…');
+ E.still.onload=function(){if(tok===token){overlay('none');E.viewNote.textContent='Flujo MJPEG continuo.'}};
+ E.still.onerror=function(){if(tok===token){E.still.className='hidden';overlay('err','No se pudo abrir el flujo MJPEG.',c.src)}};
+ E.still.src=u;E.still.className='';
+}
+function vid(c,tok){
+ var u=safeUrl(c.img);if(!u){overlay('err','URL no válida.',null);return}
+ overlay('load','Preparando vídeo…');
+ var v=E.video;v.className='';
+ function fail(m){if(tok===token){v.className='hidden';overlay('err',m,c.src)}}
+ v.onerror=function(){fail('El navegador no pudo reproducir este vídeo.')};
+ v.onplaying=function(){if(tok===token){overlay('none');E.viewNote.textContent='Vídeo en directo.'}};
+ if(c.kind==='hls'&&!v.canPlayType('application/vnd.apple.mpegurl')){
+  var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/hls.js@1';
+  s.onload=function(){
+   if(tok!==token)return;
+   if(!window.Hls||!Hls.isSupported()){fail('Este navegador no admite HLS.');return}
+   hls=new Hls();hls.on(Hls.Events.ERROR,function(e,d){if(d&&d.fatal)fail('Error fatal en el flujo HLS.')});
+   hls.loadSource(u);hls.attachMedia(v);
+  };
+  s.onerror=function(){fail('No se pudo cargar hls.js.')};
+  document.head.appendChild(s);
+ }else{v.src=u;var pr=v.play();if(pr&&pr.catch)pr.catch(function(){overlay('none')})}
+}
+function frame(c,tok){
+ var u=safeUrl(c.img);if(!u){overlay('err','URL no válida.',null);return}
+ overlay('load','Cargando página de la cámara…');
+ E.frame.className='';
+ E.frame.onload=function(){if(tok!==token)return;overlay('none');E.viewNote.textContent=mun(c)?'Página oficial de la cámara. Si queda en blanco, usa «Abrir fuente».':'Si queda en blanco, el proveedor impide la inserción: usa «Abrir fuente».'};
+ E.frame.src=u;
+}
+function portal(c,tok){
+ var o=E.overlay;o.innerHTML='';o.className='';
+ var a=el('a',null,'Abrir '+c.org+' en otra pestaña');a.href=c.url;a.target='_blank';a.rel='noopener noreferrer';
+ var b=el('button','btn','Intentar incrustar');
+ b.onclick=function(){if(tok!==token)return;overlay('load','Cargando página…');E.frame.className='';E.frame.onload=function(){if(tok===token){overlay('none');E.viewNote.textContent='Si queda en blanco, el portal bloquea la inserción.'}};E.frame.src=c.url};
+ o.appendChild(el('span',null,c.desc||'Portal externo.'));o.appendChild(a);o.appendChild(b);
+ E.viewNote.textContent='Portal externo: se intenta incrustar sin saltarse restricciones.';
+}
+
+function mapColor(c){return c.org==='DGT'?'#35b86b':(mun(c)?'#e8b64c':'#9b6cff')}
+function mapRefresh(){clearTimeout(mapTimer);mapTimer=setTimeout(doMap,240)}
+function doMap(){
+ if(!mapReady||!map)return;
+ var present={},n=0,clip=false;
+ filtered.forEach(function(c){
+  if(c.lat==null||c.lon==null)return;
+  var k=String(c.uid),m=markers.get(k);
+  if(!m){
+   if(n>=1200){clip=true;return}
+   m=L.circleMarker([+c.lat,+c.lon],{radius:6,weight:1.5,color:'#fff',fillColor:mapColor(c),fillOpacity:.92});
+   m.bindPopup(function(){
+    var h='<div class="mp"><b>'+esc(c.name)+'</b><small>'+esc(c.desc||c.town||'')+'</small>';
+    if(c.kind==='img'&&c.img){var cd=cands(c.img);if(cd.length)h+='<img src="'+esc(cd[0])+'" alt="" referrerpolicy="no-referrer">'}
+    return h+'<button type="button" data-u="'+esc(c.uid)+'">Abrir en el visor</button></div>';
+   });
+   m.addTo(map);markers.set(k,m);n++;
+  }else{m.setLatLng([+c.lat,+c.lon]);m.setStyle({fillColor:mapColor(c)});n++}
+  present[k]=1;
+ });
+ markers.forEach(function(m,k){if(!present[k]){m.remove();markers.delete(k)}});
+ E.mapCount.textContent=n+(clip?' (máx. 1200)':'')+' en mapa';
+ if(n&&!map._fit){var b=L.latLngBounds([]);markers.forEach(function(m){b.extend(m.getLatLng())});if(b.isValid()){map.fitBounds(b.pad(.08),{maxZoom:13});map._fit=true}}
+}
+function fitMap(){if(!mapReady||!map)return;var b=L.latLngBounds([]);markers.forEach(function(m){b.extend(m.getLatLng())});if(b.isValid())map.fitBounds(b.pad(.08),{maxZoom:13});else map.setView([REF.lat,REF.lon],11)}
+function ensureMap(){
+ if(mapReady)return Promise.resolve(true);
+ if(mapPromise)return mapPromise;
+ mapPromise=new Promise(function(res){
+  var urls=['https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js','https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'],i=0;
+  (function tryLoad(){
+   if(window.L)return res(true);
+   if(i>=urls.length)return res(false);
+   var s=document.createElement('script');s.src=urls[i++];
+   s.onload=function(){res(!!window.L)};s.onerror=tryLoad;
+   document.head.appendChild(s);
+  })();
+ }).then(function(ok){
+  if(!ok){$('cameraMap').innerHTML='<div class="mfail">No se pudo cargar el mapa (¿CDN bloqueada?). El visor sigue funcionando.</div>';return false}
+  var l=document.createElement('link');l.rel='stylesheet';l.href='https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css';document.head.appendChild(l);
+  map=L.map('cameraMap',{preferCanvas:true}).setView([REF.lat,REF.lon],11);
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'© Esri · © OSM'}).addTo(map);
+  map.on('popupopen',function(e){
+   var b=e.popup.getElement().querySelector('[data-u]');if(!b)return;
+   b.onclick=function(){var c=null;all.forEach(function(x){if(x.uid===b.getAttribute('data-u'))c=x});if(c){pick(c,null,false);switchTab('viewer')}};
+  });
+  mapReady=true;map.invalidateSize();doMap();
+  return true;
+ }).catch(function(){return false});
+ return mapPromise;
+}
+function switchTab(t){
+ var v=t==='viewer';
+ $('viewerPanel').style.display=v?'block':'none';
+ $('mapPanel').style.display=v?'none':'block';
+ $('tabViewer').classList.toggle('active',v);$('tabMap').classList.toggle('active',!v);
+ if(v)return;
+ ensureMap().then(function(ok){
+  if(!ok||!mapReady)return;
+  map.invalidateSize();doMap();fitMap();
+  setTimeout(function(){if(mapReady)map.invalidateSize()},150);
+ });
+}
+addEventListener('resize',function(){if(mapReady&&map)setTimeout(function(){map.invalidateSize()},150)});
+
+function interval(){return +E.autoInt.value||0}
+function reset(){nextAt=interval()&&!paused?Date.now()+interval()*1000:0;tick()}
+function tick(){
+ var iv=interval();
+ if(!iv){E.countdown.textContent='';E.btnPause.disabled=true;return}
+ E.btnPause.disabled=false;
+ if(paused){E.countdown.textContent='En pausa';return}
+ if(!selected||['portal','iframe','hls','video','mjpeg'].indexOf(selected.kind)>=0){E.countdown.textContent='';nextAt=Date.now()+iv*1000;return}
+ var left=Math.max(0,Math.round((nextAt-Date.now())/1000));
+ E.countdown.textContent=left+' s';
+ if(Date.now()>=nextAt){nextAt=Date.now()+iv*1000;show(selected,true)}
+}
+setInterval(tick,1000);
+function status(extra){
+ E.statusLine.innerHTML='';
+ if(catalogLoading){E.statusLine.appendChild(document.createTextNode('Cargando… '));E.statusLine.appendChild(el('b',null,String(dgtCams.length)));return}
+ E.statusLine.appendChild(el('b',null,String(dgtCams.length)));E.statusLine.appendChild(document.createTextNode(' DGT'));
+ if(vlcCams.length)E.statusLine.appendChild(document.createTextNode(' · '+vlcCams.length+' València'));
+ if(extraCams.length)E.statusLine.appendChild(document.createTextNode(' · '+extraCams.length+' mundo'));
+ if(extra)E.statusLine.appendChild(document.createTextNode(' ('+extra+')'));
+}
+function paintSources(){
+ E.srcList.innerHTML='';
+ SOURCES.forEach(function(s){
+  var r=el('label','sr'),cb=document.createElement('input');cb.type='checkbox';cb.checked=!!s.on;
+  cb.onchange=function(){toggle(s,cb.checked)};
+  r.appendChild(cb);r.appendChild(el('span','srn',s.org+(s.town?' · '+s.town:'')));
+  r.appendChild(el('span','src',s.state==='e'?'⚠':(s.n!=null?String(s.n):'')));
+  E.srcList.appendChild(r);
+ });
+}
+function toggle(s,on){
+ s.on=on;
+ if(!on){extraCams=extraCams.filter(function(c){return c.s!==s.id});s.state='';s.n=null;paintSources();rebuild();status();return}
+ if(s.state==='d'||s.state==='l')return;
+ s.state='l';paintSources();
+ fetchT(s.url,20000).then(function(r){return r.ok?r.json():null}).then(function(j){
+  if(!j)throw 0;
+  var cams=[],seen={};
+  (s.parse(j)||[]).slice(0,1200).forEach(function(o){
+   var u=safeUrl(o.img||'');if(!u)return;
+   var uid='x-'+s.id+'-'+o.id;if(seen[uid])return;seen[uid]=1;
+   cams.push({uid:uid,kind:classify(u),org:s.org,name:o.name||s.org,town:s.town||'',prov:'',zone:s.zone,road:'',pk:null,dir:'',lat:o.lat,lon:o.lon,img:u,src:u,s:s.id,desc:o.desc||'Catálogo público.'});
+  });
+  extraCams=extraCams.filter(function(c){return c.s!==s.id}).concat(cams);
+  s.state=cams.length?'d':'e';s.n=cams.length;paintSources();rebuild();status();
+ }).catch(function(){s.state='e';s.n=0;paintSources()});
+}
+
+function bind(){
+ var qt=null;
+ E.q.oninput=function(){clearTimeout(qt);qt=setTimeout(apply,200)};
+ [E.fOrg,E.fKind,E.fZone,E.fProv,E.fTown,E.fRoad,E.fDist,E.fSort].forEach(function(s){s.onchange=apply});
+ E.thumbs.onchange=function(){apply()};
+ $('btnReset').onclick=function(){E.q.value='';E.fOrg.value='';E.fKind.value='';E.fZone.value='';E.fProv.value='';E.fTown.value='';E.fRoad.value='';E.fDist.value='0';rebuild()};
+ E.list.onscroll=function(){if(shown<filtered.length&&E.list.scrollTop+E.list.clientHeight>=E.list.scrollHeight-300)more()};
+ $('btnCatalog').onclick=loadAll;
+ $('tabViewer').onclick=function(){switchTab('viewer')};
+ $('tabMap').onclick=function(){switchTab('map')};
+ $('btnReload').onclick=function(){if(selected){show(selected,true);reset()}};
+ $('btnOpen').onclick=function(){if(!selected)return;var u=safeUrl(selected.kind==='portal'?selected.url:selected.src);if(u)open(u,'_blank','noopener')};
+ $('btnMap').onclick=function(){
+  if(!selected||selected.lat==null)return;
+  switchTab('map');
+  ensureMap().then(function(ok){if(!ok||!mapReady)return;map.invalidateSize();map.setView([selected.lat,selected.lon],15);var m=markers.get(String(selected.uid));if(m)setTimeout(function(){m.openPopup()},150)});
+ };
+ $('btnFull').onclick=function(){var v=$('viewer'),f=v.requestFullscreen||v.webkitRequestFullscreen;if(f)f.call(v)};
+ E.autoInt.onchange=function(){lsSet('capy_auto',E.autoInt.value);reset()};
+ E.btnPause.onclick=function(){paused=!paused;E.btnPause.textContent=paused?'▶':'⏸';reset()};
+ $('addForm').onsubmit=function(ev){
+  ev.preventDefault();
+  var u=safeUrl($('cUrl').value.trim()),n=$('cName').value.trim();if(!u||!n)return;
+  var c={uid:'c-'+Date.now(),kind:$('cType').value,name:n,town:$('cTown').value.trim(),img:u,src:u,org:'Personalizada',road:'',pk:null,dir:'',prov:'',zone:'',lat:null,lon:null,desc:'Cámara propia.',custom:true};
+  customCams.push(c);$('addForm').reset();rebuild();pick(c,null,true);
+ };
+ $('btnDel').onclick=function(){
+  if(!selected||!selected.custom)return;
+  customCams=customCams.filter(function(c){return c.uid!==selected.uid});selected=null;token++;clearMedia();
+  overlay('err','Cámara eliminada.');E.camTitle.textContent='Selecciona una cámara';rebuild();
+ };
+}
+addEventListener('error',function(e){diag.textContent='ERROR';diag.className='bad';E.banner.textContent='Error: '+e.message;E.banner.classList.remove('hidden')});
+
+(function(){
+ try{
+  var a=lsGet('capy_auto');if(a&&E.autoInt.querySelector('option[value="'+a+'"]'))E.autoInt.value=a;
+  bind();paintSources();rebuild();status('listo');tick();
+  setTimeout(loadAll,80);
+ }catch(e){diag.textContent='FALLO';diag.className='bad';E.banner.textContent='Fallo al iniciar: '+e.message;E.banner.classList.remove('hidden')}
+})();
+</script>
 </body>
 </html>
