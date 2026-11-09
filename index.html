@@ -1,217 +1,37 @@
-
 <!doctype html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0b1016">
+<meta name="theme-color" content="#0a0e13">
 <meta name="referrer" content="no-referrer">
 <title>CapyCámaras · visor</title>
-<style>
-:root{
- color-scheme:dark;
- --bg:#0b1016;--bg2:#0e151d;--panel:#121a22;--panel2:#182230;--panel3:#1e2a38;
- --line:rgba(255,255,255,.075);--line2:rgba(255,255,255,.14);
- --text:#e8eff4;--muted:#8d9ca8;--dim:#6b7b88;
- --accent:#5ed3b0;--accent2:#3ea98a;--accentSoft:rgba(94,211,176,.13);
- --warn:#e8b64c;--err:#ef7b7b;
- --r:14px;--r2:10px;--shadow:0 8px 30px rgba(0,0,0,.45);
-}
-*{box-sizing:border-box}
-html,body{margin:0;height:100%}
-body{background:radial-gradient(1200px 700px at 12% -10%,#132030 0%,var(--bg) 55%) no-repeat,var(--bg);color:var(--text);font:14.5px/1.45 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%;overflow:hidden}
-h1,h2,h3,p{margin:0}
-::-webkit-scrollbar{width:10px;height:10px}
-::-webkit-scrollbar-thumb{background:#24313d;border-radius:99px;border:2px solid transparent;background-clip:content-box}
-::-webkit-scrollbar-thumb:hover{background:#31424f;background-clip:content-box}
-::-webkit-scrollbar-track{background:transparent}
-
-/* ---------- header ---------- */
-header{
- display:flex;align-items:center;gap:12px;flex-wrap:wrap;
- padding:0 14px;height:58px;background:rgba(11,16,22,.82);
- backdrop-filter:blur(14px);border-bottom:1px solid var(--line);position:relative;z-index:40
-}
-.brand{display:flex;align-items:center;gap:9px;flex:0 0 auto}
-.brandDot{width:26px;height:26px;border-radius:9px;background:linear-gradient(150deg,var(--accent),#2f8f77);box-shadow:0 0 0 1px rgba(255,255,255,.12) inset;display:grid;place-items:center;font-size:13px;color:#06231c;font-weight:800}
-header h1{font-size:15px;font-weight:650;letter-spacing:-.2px;white-space:nowrap}
-#statusLine{flex:1 1 160px;min-width:0;font-size:11.5px;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#statusLine b{color:var(--text);font-weight:650;font-variant-numeric:tabular-nums}
-.tabs{display:flex;gap:3px;background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:3px;flex:0 0 auto}
-.tabs button{border:0;background:transparent;color:var(--muted);padding:6px 13px;border-radius:99px;font-size:12.5px;font-weight:600;transition:.15s}
-.tabs button:hover{color:var(--text);border:0}
-.tabs button.active{background:var(--accentSoft);color:var(--accent)}
-.hdrBtns{display:flex;gap:6px;flex:0 0 auto}
-
-/* ---------- controles ---------- */
-input,select,button,textarea{font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:var(--r2);padding:9px 11px;min-width:0}
-select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--dim) 50%),linear-gradient(135deg,var(--dim) 50%,transparent 50%);background-position:calc(100% - 16px) 52%,calc(100% - 11px) 52%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:28px}
-input::placeholder{color:var(--dim)}
-button{cursor:pointer;transition:background .15s,border-color .15s,color .15s}
-button:hover{border-color:var(--line2);background:var(--panel3)}
-button:active{transform:translateY(1px)}
-button:disabled{opacity:.42;cursor:default;transform:none}
-.btn{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:7px 11px;background:var(--panel2);color:var(--muted)}
-.btn:hover{color:var(--text)}
-.btn.on{background:var(--accentSoft);border-color:rgba(94,211,176,.35);color:var(--accent)}
-.btn.primary{background:linear-gradient(160deg,var(--accent),var(--accent2));border-color:transparent;color:#06231c}
-.btn.primary:hover{filter:brightness(1.08);color:#06231c}
-.btn.icon{padding:7px 9px}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-
-/* ---------- layout ---------- */
-.app{display:grid;grid-template-columns:minmax(300px,352px) 1fr;height:calc(100dvh - 58px)}
-aside{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
-.pane{padding:11px 11px 0}
-.searchWrap{position:relative}
-.searchWrap span{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--dim);font-size:13px;pointer-events:none}
-#q{width:100%;padding-left:31px;background:var(--bg2)}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:7px}
-.grid2 select,.grid2 input{width:100%}
-.full{grid-column:1/-1}
-.fold{margin-top:7px}
-.fold summary{list-style:none;cursor:pointer;font-size:12px;color:var(--dim);display:flex;align-items:center;gap:6px;padding:6px 2px;user-select:none}
-.fold summary::-webkit-details-marker{display:none}
-.fold summary::before{content:"›";transition:.15s;display:inline-block;font-size:15px;line-height:1}
-.fold[open] summary::before{transform:rotate(90deg)}
-.fold summary:hover{color:var(--muted)}
-.fold .grid2{margin-top:2px}
-.listMeta{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--dim);padding:10px 12px 7px;border-top:1px solid var(--line);margin-top:9px}
-.listMeta #count{flex:1;font-weight:650;color:var(--muted);font-variant-numeric:tabular-nums}
-.listMeta label{display:flex;gap:5px;align-items:center;cursor:pointer}
-.listMeta input[type=checkbox]{width:13px;height:13px;accent-color:var(--accent);padding:0}
-.mini{font-size:11px;padding:4px 8px;background:transparent;color:var(--dim);border-color:transparent}
-.mini:hover{background:var(--panel2);color:var(--text)}
-#list{flex:1;min-height:0;overflow-y:auto;padding:0 9px 12px;scroll-behavior:smooth}
-
-/* ---------- tarjetas ---------- */
-.card{
- width:100%;display:flex;gap:9px;text-align:left;align-items:stretch;
- padding:8px;margin:0 0 6px;background:var(--panel2);border:1px solid var(--line);
- border-radius:12px;content-visibility:auto;contain-intrinsic-size:74px;position:relative;overflow:hidden
-}
-.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:transparent;transition:.15s}
-.card:hover{background:var(--panel3);border-color:var(--line2)}
-.card.active{background:#1b2f31;border-color:rgba(94,211,176,.4)}
-.card.active::before{background:var(--accent)}
-.thumb{flex:0 0 86px;height:58px;border-radius:9px;background:#070c11;overflow:hidden;display:grid;place-items:center;color:var(--dim);font-size:17px;border:1px solid var(--line)}
-.thumb img{width:100%;height:100%;object-fit:cover;display:block}
-.cardBody{min-width:0;flex:1;display:flex;flex-direction:column;justify-content:center;gap:3px}
-.card strong{display:block;font-size:13px;font-weight:600;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.card small{display:block;color:var(--dim);font-size:11.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.chips{display:flex;gap:4px;flex-wrap:wrap;margin-top:1px}
-.chip{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:10px;font-weight:600;color:var(--dim);white-space:nowrap;letter-spacing:.2px;text-transform:uppercase}
-.chip.live{border-color:rgba(94,211,176,.4);color:var(--accent);background:var(--accentSoft)}
-.chip.err{border-color:rgba(239,123,123,.4);color:var(--err)}
-.chip.dist{border-color:var(--line);color:var(--muted);text-transform:none}
-
-/* ---------- main ---------- */
-main{padding:14px 16px 26px;min-width:0;overflow-y:auto;display:flex;flex-direction:column;gap:11px}
-#banner{padding:9px 12px;border:1px solid rgba(239,123,123,.35);background:rgba(239,123,123,.09);border-radius:var(--r2);color:#f2a6a6;font-size:12.5px;line-height:1.55}
-.metaCard{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:11px 13px}
-#camTitle{font-size:16px;font-weight:650;letter-spacing:-.2px;line-height:1.3;word-break:break-word}
-#camInfo{color:var(--dim);font-size:12px;margin-top:3px;line-height:1.45}
-#camChips{display:flex;gap:5px;flex-wrap:wrap}
-.toolbar{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-.spacer{flex:1}
-.autoBox{display:flex;gap:6px;align-items:center;font-size:11.5px;color:var(--dim)}
-.autoBox select{padding:5px 26px 5px 9px;font-size:11.5px;background-color:transparent}
-.viewer{
- width:100%;height:min(64vh,700px);min-height:250px;background:#05090d;
- border:1px solid var(--line);border-radius:var(--r);overflow:hidden;position:relative;box-shadow:var(--shadow)
-}
-.viewer img.media,.viewer video,.viewer iframe{width:100%;height:100%;display:block;border:0;background:#05090d;object-fit:contain}
-#overlay{position:absolute;inset:0;display:flex;flex-direction:column;gap:11px;align-items:center;justify-content:center;text-align:center;padding:26px;color:var(--muted);background:rgba(5,9,13,.84);font-size:13px;line-height:1.6;backdrop-filter:blur(2px)}
-#overlay.err{color:#f0a3a3}
-#overlay a{color:var(--accent);font-weight:600;text-decoration:none;border-bottom:1px solid rgba(94,211,176,.4)}
-#overlay a:hover{border-color:var(--accent)}
-#overlay button{pointer-events:auto}
-.spin{width:26px;height:26px;border:2.5px solid rgba(255,255,255,.12);border-top-color:var(--accent);border-radius:50%;animation:sp .8s linear infinite}
-@keyframes sp{to{transform:rotate(360deg)}}
-.note{font-size:11.5px;color:var(--dim);line-height:1.6}
-.note.warn{color:var(--warn)}
-#resList a{color:var(--accent)}
-details.custom{border:1px solid var(--line);border-radius:var(--r);padding:9px 12px;background:var(--panel)}
-details.custom summary{cursor:pointer;color:var(--muted);font-size:12.5px;font-weight:600}
-details.custom form{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:9px}
-details.custom .full{grid-column:1/-1}
-.hidden{display:none!important}
-.skel{height:58px;border-radius:12px;background:linear-gradient(90deg,var(--panel2),var(--panel3),var(--panel2));background-size:200% 100%;animation:sk 1.2s linear infinite;margin-bottom:6px}
-@keyframes sk{to{background-position:-200% 0}}
-
-/* ---------- mapa ---------- */
-#viewerPanel{display:block}
-#mapPanel{display:none;position:relative;height:calc(100dvh - 58px);overflow:hidden}
-#cameraMap{position:absolute;inset:0;background:#0e151d}
-.leaflet-container{font:inherit;background:#0e151d}
-.leaflet-bar a{background:var(--panel2);color:var(--text);border-color:var(--line)}
-.leaflet-bar a:hover{background:var(--panel3)}
-.leaflet-popup-content-wrapper{background:var(--panel2);color:var(--text);border:1px solid var(--line2);border-radius:12px;box-shadow:var(--shadow)}
-.leaflet-popup-tip{background:var(--panel2);border:1px solid var(--line2)}
-.leaflet-popup-content{margin:11px 13px;font-size:12.5px}
-.mapPopup b{display:block;font-size:13px;margin-bottom:3px}
-.mapPopup small{display:block;color:var(--dim);margin-bottom:8px;line-height:1.4}
-.mapPopup img{display:block;width:100%;max-width:220px;border-radius:8px;margin-bottom:8px;background:#000}
-.mapPopup button{padding:5px 9px;font-size:11.5px;background:var(--accentSoft);border-color:rgba(94,211,176,.4);color:var(--accent);font-weight:650;border-radius:7px}
-.mapLegend{position:absolute;z-index:800;left:12px;bottom:12px;display:flex;gap:12px;background:rgba(11,16,22,.9);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:99px;padding:7px 13px;font-size:11px;color:var(--muted);pointer-events:none}
-.mapLegend i{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:middle}
-.mapCount{position:absolute;z-index:800;right:12px;bottom:12px;background:rgba(11,16,22,.9);border:1px solid var(--line);border-radius:99px;padding:7px 13px;font-size:11px;color:var(--muted)}
-.mapFail{position:absolute;inset:0;display:grid;place-items:center;padding:26px;text-align:center;color:var(--muted);font-size:13px;line-height:1.6}
-
-/* ---------- fuentes ---------- */
-details.sources{border:1px solid var(--line);border-radius:var(--r);background:var(--bg2);margin-top:8px}
-details.sources summary{cursor:pointer;font-size:12.5px;font-weight:600;padding:9px 11px;color:var(--muted);list-style:none}
-details.sources summary::-webkit-details-marker{display:none}
-details.sources summary:hover{color:var(--text)}
-.srcList{padding:0 8px 8px;display:flex;flex-direction:column;gap:1px;max-height:230px;overflow-y:auto}
-.srcRow{display:flex;gap:7px;align-items:center;font-size:11.5px;color:var(--muted);cursor:pointer;padding:5px 3px;border-radius:7px}
-.srcRow:hover{background:var(--panel2)}
-.srcRow input{width:13px;height:13px;accent-color:var(--accent);padding:0;flex:0 0 auto}
-.srcRow .srcName{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.srcRow .srcCount{flex:0 0 auto;font-variant-numeric:tabular-nums;color:var(--accent);font-weight:650}
-.srcRow .srcCount.err{color:var(--err)}
-.srcRow .srcCount.load{color:var(--warn)}
-.srcNote{margin:0;padding:0 11px 10px;font-size:10.5px;color:var(--dim);line-height:1.5}
-
-/* ---------- móvil ---------- */
-@media(max-width:860px){
- body{overflow:auto}
- .app{display:flex;flex-direction:column;height:auto}
- main{order:1;overflow:visible;padding:11px}
- aside{order:2;border-right:0;border-top:1px solid var(--line);min-height:0}
- #list{max-height:none;overflow:visible;padding-bottom:24px}
- .viewer{height:46vh;min-height:210px}
- header{position:sticky;top:0;height:auto;padding:9px 11px}
- .tabs{order:3;width:100%;justify-content:center}
- .hdrBtns{order:2}
- .metaCard{padding:9px 11px}
- #mapPanel{height:70vh}
-}
-@media(max-width:520px){
- .grid2{grid-template-columns:1fr}
- details.custom form{grid-template-columns:1fr}
- .thumb{flex-basis:72px;height:52px}
-}
-</style>
+<link rel="preconnect" href="https://services1.arcgis.com" crossorigin>
+<link rel="preconnect" href="https://etraffic.dgt.es">
+<link rel="preconnect" href="https://geoportal.valencia.es" crossorigin>
+<link rel="stylesheet" href="styles.css">
+<script src="app.js" defer></script>
 </head>
 <body>
-<header>
- <div class="brand"><span class="brandDot">◉</span><h1>CapyCámaras</h1></div>
- <div id="statusLine" role="status" aria-live="polite">Iniciando…</div>
- <div class="tabs" role="tablist" aria-label="Vista">
+<header class="top">
+ <div class="brand"><span class="dot">◉</span><h1>CapyCámaras</h1></div>
+ <p id="statusLine" class="status" role="status" aria-live="polite">Iniciando…</p>
+ <div class="segmented" role="tablist" aria-label="Vista">
   <button id="tabViewer" class="active" type="button" role="tab" aria-selected="true">Visor</button>
   <button id="tabMap" type="button" role="tab" aria-selected="false">Mapa</button>
  </div>
- <div class="hdrBtns">
-  <button id="btnCatalog" class="btn primary" title="Volver a consultar los catálogos">⟳ Actualizar</button>
- </div>
+ <button id="btnCatalog" class="btn primary" title="Volver a consultar los catálogos">⟳ Actualizar</button>
 </header>
+
 <div id="viewerPanel">
 <div class="app">
 <aside>
  <div class="pane">
-  <div class="searchWrap"><span>⌕</span><input id="q" type="search" placeholder="Municipio, carretera, provincia, nombre…" aria-label="Buscar"></div>
-  <div class="grid2">
+  <div class="searchWrap">
+   <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+   <input id="q" type="search" placeholder="Municipio, carretera, provincia, nombre…" aria-label="Buscar">
+  </div>
+  <div class="row2">
    <select id="fKind" aria-label="Tipo de cámara">
     <option value="">Todos los tipos</option>
     <option value="img">Imagen / cámara</option>
@@ -226,25 +46,25 @@ details.sources summary:hover{color:var(--text)}
     <option value="50">≤ 50 km</option>
     <option value="100">≤ 100 km</option>
    </select>
-   <select id="fZone" class="full" aria-label="Zona / país"></select>
+   <select id="fZone" class="span2" aria-label="Zona / país"></select>
   </div>
   <details class="fold">
    <summary>Más filtros</summary>
-   <div class="grid2">
-    <select id="fOrg" aria-label="Organismo / fuente"></select>
+   <div class="row2">
+    <select id="fOrg" aria-label="Organismo"></select>
     <select id="fProv" aria-label="Provincia"></select>
     <select id="fTown" aria-label="Localidad"></select>
     <select id="fRoad" aria-label="Carretera"></select>
-    <select id="fSort" class="full" aria-label="Ordenar">
+    <select id="fSort" class="span2" aria-label="Ordenar">
      <option value="dist">Más cerca de Paiporta</option>
      <option value="road">Carretera y punto km</option>
      <option value="town">Localidad</option>
     </select>
    </div>
   </details>
-  <details class="sources">
+  <details class="fold sources">
    <summary>🌍 Fuentes mundiales</summary>
-   <div class="srcList" id="srcList"></div>
+   <div id="srcList" class="srcList"></div>
    <p class="srcNote">Catálogos públicos de acceso libre. Se descargan solo al marcar la casilla.</p>
   </details>
  </div>
@@ -255,23 +75,25 @@ details.sources summary:hover{color:var(--text)}
  </div>
  <div id="list" aria-label="Lista de cámaras"></div>
 </aside>
+
 <main>
- <div id="banner" class="hidden"></div>
+ <div id="banner" class="banner hidden"></div>
  <div class="metaCard">
-  <div style="min-width:0">
+  <div class="metaText">
    <h2 id="camTitle">Selecciona una cámara</h2>
-   <div id="camInfo">Elige una cámara de la lista o del mapa. Las cámaras de la DGT se cargan desde su servicio oficial.</div>
+   <p id="camInfo">Elige una cámara de la lista o del mapa.</p>
   </div>
-  <div id="camChips"></div>
+  <div id="camChips" class="chips"></div>
  </div>
+
  <div class="toolbar">
-  <button id="btnReload" class="btn icon" title="Recargar">↻</button>
+  <button id="btnReload" class="btn ico" title="Recargar imagen">↻</button>
   <button id="btnOpen" class="btn">Abrir fuente</button>
   <button id="btnMap" class="btn">Ver en mapa</button>
-  <button id="btnFull" class="btn icon" title="Pantalla completa">⛶</button>
+  <button id="btnFull" class="btn ico" title="Pantalla completa">⛶</button>
   <button id="btnDel" class="btn hidden">Quitar</button>
-  <span class="spacer"></span>
-  <div class="autoBox">
+  <span class="grow"></span>
+  <div class="auto">
    <select id="autoInt" aria-label="Intervalo de actualización">
     <option value="0">Sin auto</option>
     <option value="60">1 min</option>
@@ -280,23 +102,26 @@ details.sources summary:hover{color:var(--text)}
     <option value="600">10 min</option>
     <option value="1800">30 min</option>
    </select>
-   <button id="btnPause" class="btn icon" title="Pausar">⏸</button>
-   <span id="countdown"></span>
+   <button id="btnPause" class="btn ico" title="Pausar">⏸</button>
+   <span id="countdown" class="countdown"></span>
   </div>
  </div>
+
  <div class="viewer" id="viewer">
   <img id="still" class="media hidden" alt="Imagen actual de la cámara" referrerpolicy="no-referrer">
   <video id="video" class="hidden" controls muted playsinline></video>
   <iframe id="frame" class="hidden" title="Fuente incrustada" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="no-referrer"></iframe>
-  <div id="overlay"><span>Selecciona una cámara de la lista.</span></div>
+  <div id="overlay" class="overlay"><span>Selecciona una cámara de la lista.</span></div>
  </div>
- <p class="note" id="viewNote"></p>
+
+ <p id="viewNote" class="note"></p>
  <div id="resList" class="note"></div>
+
  <details class="custom">
   <summary>＋ Añadir una cámara propia</summary>
   <form id="addForm">
-   <input class="full" id="cName" placeholder="Nombre" required maxlength="80">
-   <input class="full" id="cUrl" type="url" placeholder="https://…" required>
+   <input class="span2" id="cName" placeholder="Nombre" required maxlength="80">
+   <input class="span2" id="cUrl" type="url" placeholder="https://…" required>
    <select id="cType" aria-label="Formato">
     <option value="img">Imagen fija (JPEG/PNG)</option>
     <option value="mjpeg">Vídeo MJPEG</option>
@@ -305,14 +130,16 @@ details.sources summary:hover{color:var(--text)}
     <option value="iframe">Página incrustable</option>
    </select>
    <input id="cTown" placeholder="Localidad (opcional)" maxlength="60">
-   <button class="btn primary full" type="submit">Guardar cámara</button>
+   <button class="btn primary span2" type="submit">Guardar cámara</button>
   </form>
-  <p class="note" style="margin-top:8px">Solo fuentes públicas cuyo uso esté permitido. Se guardan en este navegador.</p>
+  <p class="note">Solo fuentes públicas cuyo uso esté permitido. Se guardan en este navegador.</p>
  </details>
- <p class="note">La DGT publica fotogramas fijos, no vídeo continuo. Las cámaras municipales de València se publican como página: se incrustan y, si hay imagen directa, se carga sola. Las fuentes mundiales se activan a mano. Cuando un proveedor bloquea la inserción, la ficha se conserva con el enlace para abrirla fuera.</p>
+
+ <p class="note">La DGT publica fotogramas fijos, no vídeo continuo. Las cámaras municipales de València se publican como página: se incrustan y, si hay imagen directa, se carga sola. Cuando un proveedor bloquea la inserción, la ficha se conserva con el enlace para abrirla fuera.</p>
 </main>
 </div>
 </div>
+
 <div id="mapPanel" aria-label="Mapa de cámaras">
  <div id="cameraMap"></div>
  <div class="mapLegend">
@@ -320,783 +147,11 @@ details.sources summary:hover{color:var(--text)}
   <span><i style="background:#e8b64c"></i>Municipal</span>
   <span><i style="background:#9b6cff"></i>Otras</span>
  </div>
- <div class="mapCount" id="mapCount"></div>
+ <div id="mapCount" class="mapCount"></div>
 </div>
 
-<script>
-'use strict';
-const REF = {name:'Paiporta', lat:39.4278, lon:-0.4169};
-const DGT_QUERY = 'https://services1.arcgis.com/nCKYwcSONQTkPA4K/arcgis/rest/services/CamarasDGT/FeatureServer/0/query';
-const DGT_PORTAL = 'https://www.dgt.es/conoce-el-estado-del-trafico/camaras-de-trafico/';
-const VLC_CKAN = 'https://opendata.vlci.valencia.es/api/3/action/package_show?id=cameres-trafic-camaras-trafico';
-const VLC_RT_CKAN = 'https://opendata.vlci.valencia.es/api/3/action/package_show?id=estat-transit-temps-real';
-const VLC_CAM_LAYER = 'https://geoportal.valencia.es/server/rest/services/OPENDATA/Trafico/MapServer/190/query';
-const VLC_VISOR = 'https://camaras.valencia.es/camaras/visualizador.html?id=';
-const PROXY = 'https://images.weserv.nl/?url=';
-const PAGE = 60;
-const STALE_MS = 3*3600*1000;
-const PROBE_MS = 9000;
-const SRC_CAP = 1400;
-const MAP_CAP = 1200;
-const OPT_CAP = 220;
-let cameraMap=null, mapMarkers=new Map(), mapReady=false, mapPromise=null, tileSwapped=false, mapTimer=null, activeCard=null;
-const PROV = {'01':'Álava','02':'Albacete','03':'Alicante','04':'Almería','05':'Ávila','06':'Badajoz','07':'Illes Balears','08':'Barcelona','09':'Burgos','10':'Cáceres','11':'Cádiz','12':'Castellón','13':'Ciudad Real','14':'Córdoba','15':'A Coruña','16':'Cuenca','17':'Girona','18':'Granada','19':'Guadalajara','20':'Gipuzkoa','21':'Huelva','22':'Huesca','23':'Jaén','24':'León','25':'Lleida','26':'La Rioja','27':'Lugo','28':'Madrid','29':'Málaga','30':'Murcia','31':'Navarra','32':'Ourense','33':'Asturias','34':'Palencia','35':'Las Palmas','36':'Pontevedra','37':'Salamanca','38':'Santa Cruz de Tenerife','39':'Cantabria','40':'Segovia','41':'Sevilla','42':'Soria','43':'Tarragona','44':'Teruel','45':'Toledo','46':'València','47':'Valladolid','48':'Bizkaia','49':'Zamora','50':'Zaragoza','51':'Ceuta','52':'Melilla'};
-const KIND_LABEL = {img:'Imagen fija', mjpeg:'Vídeo MJPEG', hls:'Vídeo HLS', video:'Vídeo', iframe:'Página', portal:'Portal'};
-
-const PORTALS = [
- {uid:'p-dgt',name:'DGT · portal de cámaras de carreteras',town:'España',prov:'',org:'DGT',url:DGT_PORTAL,desc:'Portal oficial de la DGT.'},
- {uid:'p-avamet',name:'AVAMET · webcams meteorológicas',town:'Comunitat Valenciana',prov:'',org:'AVAMET',url:'https://www.avamet.org/mxo-webcams.php',desc:'Webcams de la red AVAMET.'},
- {uid:'p-cv',name:'Webcams Comunitat Valenciana',town:'Comunitat Valenciana',prov:'',org:'Generalitat / Turisme',url:'https://www.comunitatvalenciana.com/es/webcams',desc:'Webcams de playas y localidades.'},
- {uid:'p-vlc-min',name:'València · València al minut',town:'València',prov:'46',org:'Ajuntament de València',url:'https://www.valencia.es/valenciaalminut/',desc:'Cuadro de mando municipal.'},
- {uid:'p-vlc-od',name:'València · catálogo de cámaras',town:'València',prov:'46',org:'Ajuntament de València',url:'https://opendata.vlci.valencia.es/es/dataset/cameres-trafic-camaras-trafico',desc:'Catálogo municipal de datos abiertos.',ckan:VLC_CKAN},
- {uid:'p-torrent',name:'Torrent · GeoTransit',town:'Torrent',prov:'46',org:'Ajuntament de Torrent',url:'https://geotransit.torrent.es/',desc:'Portal municipal de movilidad.'},
- {uid:'p-argos',name:'ARGOS ATLAS · cámaras CV',town:'Comunitat Valenciana',prov:'',org:'ARGOS ATLAS (tercero)',url:'https://argosatlas.com/camaras/espana/comunitat-valenciana/',desc:'Agregador de terceros.'},
- {uid:'p-meteoblue',name:'meteoblue · webcams cercanas',town:'Paiporta',prov:'46',org:'meteoblue (tercero)',url:'https://www.meteoblue.com/es/tiempo/webcams/paiporta_espa%C3%B1a_2513029',desc:'Directorio de webcams cercanas.'}
-].map(p=>Object.assign({kind:'portal',road:'',pk:null,dir:'',lat:null,lon:null,img:'',src:p.url},p));
-
-/* ===== parsers de fuentes ===== */
-function parseDigitraffic(j){
- const out=[];
- for(const f of (j.features||[])){
-  const p=f.properties||{}, g=f.geometry&&f.geometry.coordinates;
-  if(!Array.isArray(g))continue;
-  const lat=Number(g[1]),lon=Number(g[0]);
-  if(!isFinite(lat)||!isFinite(lon))continue;
-  for(const pr of (p.presets||[])){
-   if(!pr||!pr.id)continue;
-   out.push({id:String(pr.id),name:(p.name||p.id||'Cámara')+' · '+pr.id,lat,lon,
-    img:'https://weathercam.digitraffic.fi/'+pr.id+'.jpg',desc:'Cámara meteorológica de carretera (Fintraffic).'});
-  }
- }
- return out;
-}
-function parseTfl(j){
- const arr=Array.isArray(j)?j:(j&&j.places)||[];
- const out=[];
- for(const p of arr){
-  const ap=p.additionalProperties||{};
-  const img=safeUrl(ap.imageUrl||'')||(p.id?'https://s3-eu-west-1.amazonaws.com/jamcams.tfl.gov.uk/'+p.id+'.jpg':'');
-  if(!img)continue;
-  out.push({id:String(p.id||img),name:p.commonName||('JamCam '+p.id),lat:Number(p.lat),lon:Number(p.lon),img,desc:'Cámara de Transport for London.'});
- }
- return out;
-}
-function parseMadrid(j){
- const out=[];
- const walk=o=>{
-  if(!o||typeof o!=='object')return;
-  if(Array.isArray(o)){o.forEach(walk);return}
-  const u=o.url||o.imagen||o.image||o.contentUrl;
-  if(typeof u==='string'&&/\.(jpe?g|png)(\?|$)/i.test(u)){
-   const loc=o.location||o.geometry||{};
-   const co=Array.isArray(loc.coordinates)?loc.coordinates:null;
-   const lat=Number(o.latitud||o.lat||loc.latitude||(co&&co[1]));
-   const lon=Number(o.longitud||o.lon||loc.longitude||(co&&co[0]));
-   out.push({id:String(o.id||o.identifier||u),name:String(o.title||o.name||o.descripcion||'Cámara Madrid'),lat,lon,img:safeUrl(u),desc:'Cámara municipal de Madrid.'});
-  }
-  for(const k in o){const v=o[k];if(v&&typeof v==='object')walk(v)}
- };
- walk(j);
- return out;
-}
-function parseCaltrans(j){
- const out=[];
- for(const d of (j.data||[])){
-  for(const c of (d.cctv||[])){
-   const l=c.location||{};
-   const img=safeUrl(l.imageSource||'');
-   if(!img)continue;
-   out.push({id:String(c.index||img),name:l.locationName||l.route||'Cámara Caltrans',lat:Number(l.latitude),lon:Number(l.longitude),img,desc:'Cámara de Caltrans (California).'});
-  }
- }
- return out;
-}
-const SOURCES=[
- {id:'fi',zone:'Finlandia',org:'Fintraffic (Finlandia)',town:'',url:'https://tie.digitraffic.fi/api/weathercam/v1/stations',parse:parseDigitraffic},
- {id:'uk-lon',zone:'Reino Unido',org:'Transport for London',town:'Londres',url:'https://api.tfl.gov.uk/Place/Type/JamCams',parse:parseTfl},
- {id:'es-mad',zone:'España (otros)',org:'Ayuntamiento de Madrid',town:'Madrid',url:'https://datos.madrid.es/egob/catalogo/202088-0-trafico-camaras.json',parse:parseMadrid},
- {id:'us-ca',zone:'Estados Unidos',org:'Caltrans (California)',town:'',parse:parseCaltrans,
-  urls:Array.from({length:12},(_,i)=>'https://cwwp2.dot.ca.gov/data/d'+(i+1)+'/cctv/cctvStatusD'+String(i+1).padStart(2,'0')+'.json')},
- {id:'w-windy',zone:'Mundo',org:'Windy.com',town:'',portal:true,url:'https://www.windy.com/-Webcams/webcams'},
- {id:'w-skyline',zone:'Mundo',org:'SkylineWebcams',town:'',portal:true,url:'https://www.skylinewebcams.com/'},
- {id:'w-earthcam',zone:'Mundo',org:'EarthCam',town:'',portal:true,url:'https://www.earthcam.com/'},
- {id:'w-insecam',zone:'Mundo',org:'Insecam',town:'',portal:true,url:'https://www.insecam.org/'}
-];
-
-/* ===== estado ===== */
-let dgtCams=[], valenciaCams=[], customCams=[], extraCams=[], all=[], filtered=[], shown=0;
-let selected=null, viewToken=0, loadedAt=null;
-let paused=false, nextAt=0, lastCatalog=null, catalogLoading=false, catalogError='';
-let hlsInstance=null, munTimer=null, io=null;
-const $=s=>document.querySelector(s);
-const E={q:$('#q'),fOrg:$('#fOrg'),fKind:$('#fKind'),fZone:$('#fZone'),fProv:$('#fProv'),fTown:$('#fTown'),fRoad:$('#fRoad'),fDist:$('#fDist'),fSort:$('#fSort'),list:$('#list'),count:$('#count'),thumbs:$('#thumbs'),still:$('#still'),video:$('#video'),frame:$('#frame'),overlay:$('#overlay'),title:$('#camTitle'),info:$('#camInfo'),chips:$('#camChips'),note:$('#viewNote'),res:$('#resList'),banner:$('#banner'),status:$('#statusLine'),autoInt:$('#autoInt'),pause:$('#btnPause'),cd:$('#countdown'),srcList:$('#srcList'),mapCount:$('#mapCount')};
-
-function el(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e}
-function lower(o){const r={};for(const k in o)r[k.toLowerCase()]=o[k];return r}
-function norm(s){return String(s==null?'':s).toLocaleLowerCase('es').normalize('NFD').replace(/[\u0300-\u036f]/g,'')}
-function haversine(a,b,c,d){const R=6371,r=x=>x*Math.PI/180,dl=r(c-a),dn=r(d-b);const h=Math.sin(dl/2)**2+Math.cos(r(a))*Math.cos(r(c))*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
-function fmtTime(d){return d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}
-function safeUrl(u){try{const x=new URL(u,location.href);return(x.protocol==='https:'||x.protocol==='http:')?x.href:''}catch(e){return ''}}
-function bust(u){try{const x=new URL(u);x.searchParams.set('_t',Date.now());return x.href}catch(e){return u}}
-function fetchT(url,ms,opt){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms);return fetch(url,Object.assign({signal:c.signal},opt||{})).finally(()=>clearTimeout(t))}
-function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
-function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
-function esc(s){return String(s==null?'':s).replace(/[<>&"]/g,m=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[m]))}
-function isMunicipal(c){return !!(c&&c.municipal)}
-function isLive(c){return !!(c&&(c.kind==='mjpeg'||c.kind==='hls'||c.kind==='video'||isMunicipal(c)))}
-function proxyUrl(u){try{const x=new URL(u);if(!x.host)return '';return PROXY+encodeURIComponent(x.host+x.pathname+x.search)}catch(e){return ''}}
-function imgCandidates(u){
- u=String(u||'').trim();if(!u)return[];
- if(u.startsWith('//'))u='https:'+u;
- const direct=[];
- if(u.startsWith('http://')){direct.push('https://'+u.slice(7));if(location.protocol!=='https:')direct.push(u)}
- else direct.push(u);
- return direct.concat(direct.map(proxyUrl).filter(Boolean)).filter(x=>safeUrl(x));
-}
-
-/* ===== catálogos ===== */
-async function loadDGT(){
- const fields='OBJECTID,id,carretera,pk,sentido,provincia,imagen,latitud,longitud,NAMEUNIT,codine';
- let rows=[],offset=0,guard=0;
- while(guard++<10){
-  const p=new URLSearchParams({where:'1=1',outFields:fields,returnGeometry:'false',orderByFields:'OBJECTID',resultOffset:String(offset),resultRecordCount:'2000',f:'json'});
-  const r=await fetchT(DGT_QUERY+'?'+p.toString(),25000);
-  if(!r.ok)throw new Error('HTTP '+r.status);
-  const j=await r.json();
-  if(j&&j.error)throw new Error('ArcGIS: '+(j.error.message||j.error.code));
-  if(!j||!Array.isArray(j.features))throw new Error('La respuesta no contiene «features».');
-  for(const f of j.features)rows.push(lower(f.attributes||{}));
-  if(j.exceededTransferLimit&&j.features.length)offset+=j.features.length;else break;
- }
- let noImg=0;const out=[];
- for(const a of rows){
-  const img=String(a.imagen||'').trim();
-  if(!img){noImg++;continue}
-  const code=(a.codine&&String(a.codine).length>=2)?String(a.codine).slice(0,2):(a.provincia!=null?String(a.provincia).padStart(2,'0'):'');
-  const lat=Number(a.latitud),lon=Number(a.longitud);
-  const ok=isFinite(lat)&&isFinite(lon)&&lat!==0&&lon!==0;
-  const road=String(a.carretera||'').trim(),pk=(a.pk!=null&&isFinite(Number(a.pk)))?Number(a.pk):null,dir=String(a.sentido||'').trim();
-  out.push({uid:'dgt-'+(a.id!=null?a.id:a.objectid),kind:'img',org:'DGT',road,pk,dir,
-   name:(road||'Cámara DGT')+(pk!=null?' · km '+pk:'')+(dir?' · '+dir:''),
-   town:String(a.nameunit||'').trim(),prov:code,zone:'España',lat:ok?lat:null,lon:ok?lon:null,img,src:img,
-   desc:'Cámara de la DGT (imagen fija).'});
- }
- return {cams:out,total:rows.length,noImg};
-}
-function classifyCameraUrl(u){
- u=safeUrl(u); if(!u)return null;
- const l=u.toLowerCase().split('#')[0], path=l.split('?')[0];
- if(/\.m3u8$/.test(path)||path.includes('/hls/'))return 'hls';
- if(/\.(mp4|webm|ogg)$/.test(path))return 'video';
- if(/mjpeg|multipart|motion\.cgi|video\.mjpg|stream\.cgi/.test(path))return 'mjpeg';
- if(/\.(jpe?g|png|webp|gif|bmp|avif)$/.test(path))return 'img';
- if(/\.(html?|php|aspx?|jsp)$/.test(path))return 'iframe';
- if(/visualizador|embed|player|visor|reproductor/.test(l))return 'iframe';
- if(/camera|camara|camaras|trafic|traffic/.test(l)&&!/\.(html?|php)$/.test(path))return 'img';
- return 'iframe';
-}
-async function loadValenciaCams(){
- const byId=new Map();
- try{
-  const u=VLC_CAM_LAYER+'?where=1%3D1&outFields=objectid,idcamara,tipocamara,descripcio,url,anggra&returnGeometry=true&outSR=4326&f=geojson&resultRecordCount=2000';
-  const r=await fetchT(u,20000);
-  if(r.ok){
-   const j=await r.json();
-   for(const f of (j.features||[])){
-    const p=f.properties||{}, g=f.geometry||{};
-    const co=Array.isArray(g.coordinates)?g.coordinates:null;
-    const lat=co?Number(co[1]):NaN, lon=co?Number(co[0]):NaN;
-    const id=String(p.idcamara||p.objectid||'').trim();
-    if(!id)continue;
-    byId.set(id,{id,url:safeUrl(p.url||'')||(VLC_VISOR+encodeURIComponent(id)),lat,lon,desc:String(p.descripcio||'').trim(),ang:Number(p.anggra)});
-   }
-  }
- }catch(e){}
- if(!byId.size){
-  try{
-   const meta=await fetchT(VLC_RT_CKAN,15000);
-   if(meta.ok){
-    const pkg=await meta.json();
-    for(const res of ((pkg&&pkg.result&&pkg.result.resources)||[])){
-     if(!res||!safeUrl(res.url)||!/geojson|json/i.test((res.format||'')+' '+(res.name||'')))continue;
-     try{
-      const rr=await fetchT(res.url,20000,{cache:'no-store'});
-      if(!rr.ok)continue;
-      const j=await rr.json();
-      for(const a of (Array.isArray(j.features)?j.features.map(f=>lower(f.properties||{})):[])){
-       const id=String(a.idcamara||a.objectid||'').trim(), url=safeUrl(a.url||'');
-       if(!id||!url||byId.has(id))continue;
-       byId.set(id,{id,url,lat:Number(a.latitud||a.latitude),lon:Number(a.longitud||a.longitude),desc:String(a.descripcio||'').trim(),ang:NaN});
-      }
-      if(byId.size)break;
-     }catch(e){}
-    }
-   }
-  }catch(e){}
- }
- const out=[];
- for(const v of byId.values()){
-  const kind=classifyCameraUrl(v.url)||'iframe';
-  const ok=isFinite(v.lat)&&isFinite(v.lon)&&v.lat!==0&&v.lon!==0;
-  const numeric=String(v.id).replace(/\D/g,'');
-  out.push({uid:'vlc-'+v.id,kind,org:'Ajuntament de València',road:'',pk:null,dir:'',prov:'46',zone:'España',
-   name:v.desc||('Cámara València '+v.id),town:'València',lat:ok?v.lat:null,lon:ok?v.lon:null,img:v.url,src:v.url,
-   municipal:true,imgGuess:numeric?'https://camaras.valencia.es/camaras/img/'+numeric+'.jpg':'',
-   desc:'Fuente municipal de tráfico (página de visualización).'});
- }
- return out;
-}
-async function loadCatalogs(){
- if(catalogLoading)return;catalogLoading=true;catalogError='';
- setStatus();E.list.setAttribute('aria-busy','true');
- let meta='';
- const [dgtRes,vlcRes]=await Promise.all([loadDGT().catch(e=>({error:e})),loadValenciaCams().catch(()=>[])]);
- if(dgtRes&&!dgtRes.error){dgtCams=dgtRes.cams;lastCatalog=new Date();meta=dgtRes.total+' registros DGT, '+dgtRes.noImg+' sin imagen'}
- else{
-  const e=dgtRes&&dgtRes.error;
-  const msg=(e&&e.name==='AbortError')?'tiempo de espera agotado':(e&&e.message)||'error';
-  catalogError='No se pudo cargar el catálogo de la DGT ('+msg+'). ';
-  if(location.protocol==='file:')catalogError+='Sírvelo con «python3 -m http.server 8000». ';
-  catalogError+='Comprueba la conexión y pulsa «Actualizar».';
- }
- valenciaCams=Array.isArray(vlcRes)?vlcRes:[];
- meta+=(meta?' · ':'')+valenciaCams.length+' València';
- catalogLoading=false;E.list.removeAttribute('aria-busy');
- rebuildAll();setStatus(meta);
- E.banner.textContent=catalogError;
- E.banner.classList.toggle('hidden',!catalogError);
-}
-
-/* ===== índice + selects ===== */
-function rebuildAll(){
- const map=new Map();
- for(const c of dgtCams.concat(valenciaCams,customCams,extraCams,PORTALS))if(c&&c.uid&&!map.has(c.uid))map.set(c.uid,c);
- all=Array.from(map.values());
- const orgs=new Set(),zones=new Set(),provs=new Set(),towns=new Set(),roads=new Set();
- for(const c of all){
-  c._d=(c.lat!=null&&c.lon!=null)?haversine(REF.lat,REF.lon,c.lat,c.lon):null;
-  c._hay=norm([c.name,c.town,c.road,c.dir,c.zone,PROV[c.prov]||'',c.org,c.desc].join(' '));
-  if(c.org)orgs.add(c.org);
-  if(c.zone)zones.add(c.zone);
-  if(c.prov)provs.add(c.prov);
-  if(c.kind!=='portal'){
-   if(c.town)towns.add(c.town);
-   if(c.road)roads.add(c.road);
-  }
- }
- fillSelect(E.fOrg,'Todos los organismos',Array.from(orgs).sort((a,b)=>a.localeCompare(b,'es')).map(v=>[v,v]),E.fOrg.value,OPT_CAP);
- fillSelect(E.fZone,'Todas las zonas',Array.from(zones).sort((a,b)=>a.localeCompare(b,'es')).map(v=>[v,v]),E.fZone.value,0);
- fillSelect(E.fProv,'Todas las provincias',Array.from(provs).sort((a,b)=>(PROV[a]||a).localeCompare(PROV[b]||b,'es')).map(v=>[v,PROV[v]||('Provincia '+v)]),E.fProv.value,0);
- rebuildDependent(towns,roads);
- applyFilters();
-}
-function fillSelect(sel,allLabel,pairs,keep,cap){
- sel.replaceChildren();
- const o=el('option',null,allLabel);o.value='';sel.appendChild(o);
- const lim=cap&&pairs.length>cap?cap:pairs.length;
- for(let i=0;i<lim;i++){const x=el('option',null,pairs[i][1]);x.value=pairs[i][0];sel.appendChild(x)}
- if(cap&&pairs.length>cap){const x=el('option',null,'… '+(pairs.length-cap)+' más (usa la búsqueda)');x.value='';x.disabled=true;sel.appendChild(x)}
- sel.value=pairs.some(p=>p[0]===keep)?keep:'';
-}
-function rebuildDependent(towns,roads){
- const prov=E.fProv.value, town=E.fTown.value;
- if(!towns||!roads){
-  towns=new Set();roads=new Set();
-  for(const c of all){
-   if(c.kind==='portal'||(prov&&c.prov!==prov))continue;
-   if(c.town)towns.add(c.town);
-   if(c.road&&(!town||c.town===town))roads.add(c.road);
-  }
- }
- const t=Array.from(towns).sort((a,b)=>a.localeCompare(b,'es')).map(v=>[v,v]);
- fillSelect(E.fTown,'Todas las localidades',t,E.fTown.value,OPT_CAP);
- fillSelect(E.fRoad,'Todas las carreteras',Array.from(roads).sort((a,b)=>a.localeCompare(b,'es',{numeric:true})).map(v=>[v,v]),E.fRoad.value,OPT_CAP);
-}
-
-/* ===== filtros ===== */
-function applyFilters(){
- const q=norm(E.q.value.trim()),org=E.fOrg.value,kind=E.fKind.value,zone=E.fZone.value,prov=E.fProv.value,town=E.fTown.value,road=E.fRoad.value,maxd=Number(E.fDist.value)||0,sort=E.fSort.value;
- const terms=q?q.split(/\s+/):null;
- filtered=[];
- for(const c of all){
-  if(org&&c.org!==org)continue;
-  if(kind){
-   if(kind==='video'){if(!(c.kind==='mjpeg'||c.kind==='hls'||c.kind==='video'))continue}
-   else if(kind==='liveimg'){if(!isMunicipal(c))continue}
-   else if(c.kind!==kind)continue;
-  }
-  if(zone&&c.zone!==zone)continue;
-  if(prov&&c.prov!==prov)continue;
-  if(town&&c.town!==town)continue;
-  if(road&&c.road!==road)continue;
-  if(maxd&&(c._d==null||c._d>maxd))continue;
-  if(terms){let ok=true;for(const t of terms)if(!c._hay.includes(t)){ok=false;break}if(!ok)continue}
-  filtered.push(c);
- }
- const cmpD=(a,b)=>(a._d==null?1e9:a._d)-(b._d==null?1e9:b._d);
- if(sort==='road')filtered.sort((a,b)=>(a.road||'~').localeCompare(b.road||'~','es',{numeric:true})||((a.pk||0)-(b.pk||0)));
- else if(sort==='town')filtered.sort((a,b)=>(a.town||'~').localeCompare(b.town||'~','es')||cmpD(a,b));
- else filtered.sort((a,b)=>(a.kind==='portal')-(b.kind==='portal')||cmpD(a,b));
- shown=0;E.list.replaceChildren();E.list.scrollTop=0;activeCard=null;
- E.count.textContent=filtered.length+(filtered.length===1?' cámara':' cámaras');
- if(!filtered.length){E.list.appendChild(el('p','note',all.length?'Ninguna cámara coincide con los filtros.':(catalogLoading?'Cargando cámaras…':'No hay cámaras cargadas.')))}
- else renderMore();
- scheduleMap();
-}
-function renderMore(){
- const end=Math.min(shown+PAGE,filtered.length),frag=document.createDocumentFragment();
- for(let i=shown;i<end;i++)frag.appendChild(makeCard(filtered[i]));
- shown=end;E.list.appendChild(frag);
- observeThumbs(frag);
-}
-function observeThumbs(frag){
- if(!E.thumbs.checked)return;
- const nodes=frag?Array.from(frag.querySelectorAll('.thumb[data-src]')):Array.from(E.list.querySelectorAll('.thumb[data-src]'));
- if(!('IntersectionObserver' in window)){nodes.forEach(loadThumb);return}
- if(!io)io=new IntersectionObserver(es=>{for(const e of es)if(e.isIntersecting){io.unobserve(e.target);loadThumb(e.target)}},{root:E.list,rootMargin:'200px'});
- nodes.forEach(t=>io.observe(t));
-}
-function loadThumb(t){
- const u=t.getAttribute('data-src');t.removeAttribute('data-src');if(!u)return;
- const im=new Image();im.decoding='async';im.referrerPolicy='no-referrer';im.alt='';
- im.onload=()=>t.replaceChildren(im);
- im.onerror=()=>{t.textContent='⚠'};
- im.src=u;
-}
-function makeCard(c){
- const b=el('button','card'+(selected&&selected.uid===c.uid?' active':''));b.type='button';b.dataset.uid=c.uid;
- const t=el('div','thumb',c.kind==='portal'?'◍':(c.kind==='img'?'▤':'▷'));
- if(c.kind==='img'&&E.thumbs.checked){const cand=imgCandidates(c.img);if(cand.length)t.setAttribute('data-src',cand[0])}
- const body=el('div','cardBody');
- body.appendChild(el('strong',null,c.name));
- body.appendChild(el('small',null,[c.town,c.zone||PROV[c.prov]].filter(Boolean).join(' · ')||c.desc||''));
- const chips=el('div','chips');
- chips.appendChild(el('span','chip',c.org));
- chips.appendChild(el('span','chip'+(isLive(c)?' live':''),isMunicipal(c)?'Municipal':KIND_LABEL[c.kind]));
- if(c._d!=null)chips.appendChild(el('span','chip dist',c._d<10?c._d.toFixed(1)+' km':Math.round(c._d)+' km'));
- body.appendChild(chips);
- b.append(t,body);
- b.addEventListener('click',()=>selectCam(c,b,true));
- return b;
-}
-
-/* ===== visor ===== */
-function setOverlay(mode,msg,link,proxyBtn){
- const o=E.overlay;o.replaceChildren();o.className='';
- if(mode==='none'){o.classList.add('hidden');return}
- if(mode==='loading'){o.appendChild(el('div','spin'));o.appendChild(el('span',null,msg||'Cargando…'));return}
- if(mode==='err')o.classList.add('err');
- o.appendChild(el('span',null,msg));
- if(link){const a=el('a',null,'Abrir la fuente en otra pestaña');a.href=link;a.target='_blank';a.rel='noopener noreferrer';o.appendChild(a)}
- if(proxyBtn){const b=el('button','btn',"Reintentar con proxy");b.type='button';b.addEventListener('click',()=>{if(selected)showImage(selected,true,viewToken,true)});o.appendChild(b)}
-}
-function hideMedia(){
- E.still.classList.add('hidden');E.video.classList.add('hidden');E.frame.classList.add('hidden');
- E.still.onload=null;E.still.onerror=null;E.still.removeAttribute('src');
- try{E.video.pause()}catch(e){}
- if(hlsInstance){try{hlsInstance.destroy()}catch(e){}hlsInstance=null}
- E.video.onerror=null;E.video.onplaying=null;E.video.removeAttribute('src');try{E.video.load()}catch(e){}
- E.frame.onload=null;if(E.frame.getAttribute('src'))E.frame.src='about:blank';
- clearTimeout(munTimer);
-}
-function selectCam(c,cardEl,scroll){
- selected=c;viewToken++;loadedAt=null;hideMedia();
- E.res.replaceChildren();E.note.textContent='';E.note.className='note';
- E.title.textContent=c.name;
- const bits=[];if(c.town)bits.push(c.town);if(c.zone)bits.push(c.zone);if(c.prov&&PROV[c.prov]&&PROV[c.prov]!==c.zone)bits.push(PROV[c.prov]);
- if(c.road)bits.push(c.road+(c.pk!=null?' km '+c.pk:'')+(c.dir?' ('+c.dir+')':''));
- bits.push('Fuente: '+c.org);
- E.info.textContent=bits.join(' · ')+(c.desc&&c.kind!=='img'?' — '+c.desc:'');
- E.chips.replaceChildren();E.chips.appendChild(el('span','chip'+(isLive(c)?' live':''),isMunicipal(c)?'Municipal':KIND_LABEL[c.kind]));
- $('#btnDel').classList.toggle('hidden',!c.custom);
- $('#btnMap').disabled=c.lat==null;
- $('#btnReload').disabled=c.kind==='portal';
- if(activeCard)activeCard.classList.remove('active');
- if(cardEl){activeCard=cardEl;cardEl.classList.add('active')}
- showCam(c,false);resetCountdown();
- if(scroll&&window.matchMedia('(max-width:860px)').matches)$('#camTitle').scrollIntoView({behavior:'smooth',block:'start'});
-}
-function showCam(c,refresh){
- const tok=viewToken;
- if(c.kind==='img')return showImage(c,refresh,tok);
- if(c.kind==='mjpeg')return showMjpeg(c,tok);
- if(c.kind==='hls'||c.kind==='video')return showVideo(c,tok);
- if(c.kind==='iframe'){showFrame(c,tok);if(isMunicipal(c))tryMunicipalImage(c,tok);return}
- showPortal(c,tok);
-}
-function tryMunicipalImage(c,tok){
- if(!c.imgGuess)return;
- const probe=new Image();probe.referrerPolicy='no-referrer';
- probe.onload=()=>{if(tok!==viewToken||!probe.naturalWidth)return;c.kind='img';c.img=c.imgGuess;c.src=c.imgGuess;showImage(c,false,tok)};
- probe.src=c.imgGuess;
-}
-function showImage(c,refresh,tok,forceProxy){
- const cands=imgCandidates(c.img);
- const urls=forceProxy?cands.filter(u=>u.startsWith(PROXY)):cands;
- if(!urls.length){setOverlay('err','Esta cámara no tiene una URL de imagen válida.',null,!!c.img);return}
- E.video.classList.add('hidden');E.frame.classList.add('hidden');
- if(!refresh||E.still.classList.contains('hidden'))setOverlay('loading','Cargando imagen…');
- let i=0;
- const next=()=>{
-  if(tok!==viewToken)return;
-  if(i>=urls.length){
-   E.still.classList.add('hidden');
-   setOverlay('err','No se pudo cargar la imagen. Puede estar desconectada, caducada, bloqueada por el proveedor o ser un enlace roto.',c.src,true);
-   markCardError(c);return;
-  }
-  const base=urls[i++], u=refresh?bust(base):base;
-  let done=false;const probe=new Image();probe.referrerPolicy='no-referrer';
-  const fail=()=>{if(done)return;done=true;clearTimeout(tm);next()};
-  const tm=setTimeout(fail,PROBE_MS);
-  probe.onload=()=>{
-   if(done)return;done=true;clearTimeout(tm);
-   if(tok!==viewToken||!probe.naturalWidth)return;
-   E.still.src=probe.src;E.still.classList.remove('hidden');setOverlay('none');
-   loadedAt=new Date();clearTimeout(munTimer);
-   if(isMunicipal(c)){
-    E.note.textContent='Cámara municipal: fotograma actualizado cada 5 s.';
-    munTimer=setTimeout(()=>{if(tok===viewToken&&!document.hidden&&!paused)showImage(c,true,tok,forceProxy)},5000);
-   }else E.note.textContent='Imagen fija cargada a las '+fmtTime(loadedAt)+'. La fuente la renueva periódicamente.';
-   checkFreshness(base,tok);
-  };
-  probe.onerror=fail;probe.src=u;
- };
- next();
-}
-function markCardError(c){
- const b=E.list.querySelector('.card[data-uid="'+(window.CSS&&CSS.escape?CSS.escape(c.uid):c.uid)+'"] .chips');
- if(b&&!b.querySelector('.chip.err'))b.appendChild(el('span','chip err','sin imagen'));
-}
-function checkFreshness(url,tok){
- fetchT(url,6000,{method:'HEAD',cache:'no-store',referrerPolicy:'no-referrer'}).then(r=>{
-  if(tok!==viewToken||!r.ok)return;
-  const lm=r.headers.get('last-modified');if(!lm)return;
-  const d=new Date(lm);if(isNaN(d))return;
-  E.note.textContent+=' Última modificación: '+d.toLocaleString('es-ES')+'.';
-  if(Date.now()-d.getTime()>STALE_MS){E.note.classList.add('warn');E.note.textContent+=' ⚠ Parece caducada.'}
- }).catch(()=>{});
-}
-function showMjpeg(c,tok){
- const u=safeUrl(c.img);if(!u){setOverlay('err','URL no válida.',null);return}
- setOverlay('loading','Conectando con el flujo MJPEG…');
- E.still.onload=()=>{if(tok===viewToken){setOverlay('none');E.note.textContent='Flujo MJPEG continuo.'}};
- E.still.onerror=()=>{if(tok===viewToken){E.still.classList.add('hidden');setOverlay('err','No se pudo abrir el flujo MJPEG.',c.src)}};
- E.still.src=u;E.still.classList.remove('hidden');
-}
-function loadScript(src){return new Promise((ok,ko)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=()=>ko(new Error('script'));document.head.appendChild(s)})}
-async function showVideo(c,tok){
- const u=safeUrl(c.img);if(!u){setOverlay('err','URL no válida.',null);return}
- setOverlay('loading','Preparando vídeo…');
- const v=E.video;v.classList.remove('hidden');
- const fail=m=>{if(tok===viewToken){v.classList.add('hidden');setOverlay('err',m,c.src)}};
- v.onerror=()=>fail('El navegador no pudo reproducir este vídeo (formato, CORS o enlace roto).');
- v.onplaying=()=>{if(tok===viewToken){setOverlay('none');E.note.textContent='Vídeo en directo.'}};
- try{
-  if(c.kind==='hls'&&!v.canPlayType('application/vnd.apple.mpegurl')){
-   if(!window.Hls)await loadScript('https://cdn.jsdelivr.net/npm/hls.js@1');
-   if(tok!==viewToken)return;
-   if(!window.Hls||!window.Hls.isSupported()){fail('Este navegador no admite HLS.');return}
-   hlsInstance=new window.Hls();
-   hlsInstance.on(window.Hls.Events.ERROR,(e,d)=>{if(d&&d.fatal)fail('Error fatal en el flujo HLS ('+(d.details||'desconocido')+').')});
-   hlsInstance.loadSource(u);hlsInstance.attachMedia(v);
-  }else v.src=u;
-  const p=v.play();if(p&&p.catch)p.catch(()=>setOverlay('none'));
- }catch(e){fail('No se pudo cargar el reproductor HLS.')}
-}
-function showFrame(c,tok){
- const u=safeUrl(c.img);if(!u){setOverlay('err','URL no válida.',null);return}
- setOverlay('loading','Cargando página de la cámara…');
- E.frame.classList.remove('hidden');
- E.frame.onload=()=>{
-  if(tok!==viewToken)return;
-  setOverlay('none');
-  E.note.textContent=isMunicipal(c)?'Página oficial de la cámara municipal. Si queda en blanco, el proveedor impide la inserción: usa «Abrir fuente».':'Si la página queda en blanco, el proveedor impide su inserción: usa «Abrir fuente».';
- };
- E.frame.src=u;
-}
-function showPortal(c,tok){
- const o=E.overlay;o.replaceChildren();o.className='';
- const municipal=isMunicipal(c)||/municipal|ajuntament|ayuntamiento/i.test(c.name+' '+c.org);
- const a=el('a',null,'Abrir '+c.org+' en otra pestaña');a.href=c.url;a.target='_blank';a.rel='noopener noreferrer';
- const b=el('button','btn',municipal?'Recargar':'Intentar incrustar');
- const load=()=>{
-  if(tok!==viewToken)return;
-  setOverlay('loading','Cargando página…');
-  E.frame.classList.remove('hidden');
-  E.frame.onload=()=>{if(tok===viewToken){setOverlay('none');E.note.textContent='Si queda en blanco, el portal bloquea la inserción. Usa «Abrir fuente».'}};
-  E.frame.src=c.url;
- };
- o.appendChild(el('span',null,c.desc||'Portal externo.'));
- o.appendChild(a);b.addEventListener('click',load);o.appendChild(b);
- E.note.textContent=municipal?'Portal municipal: se intenta mostrar dentro del visor.':'Portal externo: se intenta incrustar sin saltarse restricciones.';
- if(municipal)setTimeout(load,0);
- if(c.ckan)loadCkan(c,tok);
-}
-async function loadCkan(c,tok){
- E.res.textContent='Consultando la API del catálogo…';
- try{
-  const r=await fetchT(c.ckan,15000);if(!r.ok)throw new Error('HTTP '+r.status);
-  const j=await r.json();const res=j&&j.result&&Array.isArray(j.result.resources)?j.result.resources:null;
-  if(!res)throw new Error('respuesta inesperada');
-  if(tok!==viewToken)return;
-  E.res.replaceChildren(el('div',null,'Recursos publicados ('+res.length+'):'));
-  const ul=el('ul');
-  for(const x of res){const li=el('li');const u=safeUrl(x.url);if(u){const a=el('a',null,x.name||x.format||'recurso');a.href=u;a.target='_blank';a.rel='noopener noreferrer';li.appendChild(a)}else li.textContent=x.name||'recurso';ul.appendChild(li)}
-  E.res.appendChild(ul);
- }catch(e){if(tok===viewToken)E.res.textContent='No se pudo leer la API del catálogo ('+((e&&e.message)||'error')+'). Usa «Abrir fuente».'}
-}
-
-/* ===== mapa ===== */
-function mapColor(c){return c.org==='DGT'?'#35b86b':(isMunicipal(c)?'#e8b64c':'#9b6cff')}
-function mapPopup(c){
- let html='<div class="mapPopup"><b>'+esc(c.name)+'</b><small>'+esc(c.desc||c.town||'')+'</small>';
- if(c.kind==='img'&&c.img){const cand=imgCandidates(c.img);if(cand.length)html+='<img src="'+esc(cand[0])+'" alt="" loading="lazy" referrerpolicy="no-referrer">'}
- return html+'<button type="button" data-map-uid="'+esc(c.uid)+'">Abrir en el visor</button></div>';
-}
-function scheduleMap(){clearTimeout(mapTimer);mapTimer=setTimeout(refreshMap,240)}
-function ensureMap(){
- if(mapReady)return Promise.resolve(true);
- if(mapPromise)return mapPromise;
- mapPromise=buildMap().then(ok=>{mapPromise=null;return ok},()=>{mapPromise=null;return false});
- return mapPromise;
-}
-function loadLeaflet(){
- return new Promise((resolve,reject)=>{
-  if(window.L)return resolve();
-  const ex=document.querySelector('script[data-capy-leaflet]');
-  if(ex){ex.addEventListener('load',resolve,{once:true});ex.addEventListener('error',()=>reject(new Error('Leaflet')),{once:true});return}
-  if(!document.querySelector('link[data-capy-leaflet]')){
-   const l=document.createElement('link');l.rel='stylesheet';l.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';l.dataset.capyLeaflet='';document.head.appendChild(l);
-  }
-  const s=document.createElement('script');s.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';s.dataset.capyLeaflet='';
-  s.onload=resolve;s.onerror=()=>reject(new Error('Leaflet'));document.head.appendChild(s);
- });
-}
-async function buildMap(){
- const host=document.getElementById('cameraMap');host.replaceChildren();
- try{
-  await loadLeaflet();
-  if(!window.L)throw new Error('Leaflet');
-  cameraMap=L.map(host,{preferCanvas:true,worldCopyJump:true}).setView([REF.lat,REF.lon],11);
-  const esri=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{
-   maxZoom:19,attribution:'© Esri · © OpenStreetMap'
-  }).addTo(cameraMap);
-  let errs=0;
-  esri.on('tileerror',()=>{
-   if(tileSwapped||++errs<8)return;
-   tileSwapped=true;cameraMap.removeLayer(esri);
-   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:20,subdomains:'abcd',attribution:'© OSM · © CARTO'}).addTo(cameraMap);
-  });
-  mapReady=true;
-  cameraMap.on('popupopen',e=>{
-   const b=e.popup.getElement()&&e.popup.getElement().querySelector('[data-map-uid]');
-   if(!b)return;
-   b.addEventListener('click',()=>{
-    const c=all.find(x=>String(x.uid)===String(b.getAttribute('data-map-uid')));
-    if(c){selectCam(c,null,false);switchTab('viewer')}
-   });
-  });
-  cameraMap.whenReady(()=>cameraMap.invalidateSize());
-  refreshMap();
-  return true;
- }catch(e){
-  host.innerHTML='<div class="mapFail">No se pudo cargar el mapa. Vuelve a pulsar «Mapa» para reintentar.</div>';
-  return false;
- }
-}
-function refreshMap(){
- if(!mapReady||!cameraMap)return;
- const present=new Set();let n=0,clipped=false;
- for(const c of filtered){
-  if(c.lat==null||c.lon==null)continue;
-  const lat=Number(c.lat),lon=Number(c.lon);
-  if(!Number.isFinite(lat)||!Number.isFinite(lon))continue;
-  const key=String(c.uid);
-  let m=mapMarkers.get(key);
-  if(!m){
-   if(n>=MAP_CAP){clipped=true;continue}
-   m=L.circleMarker([lat,lon],{radius:6,weight:1.5,color:'#fff',fillColor:mapColor(c),fillOpacity:.92});
-   m.bindPopup(()=>mapPopup(c));
-   m.addTo(cameraMap);mapMarkers.set(key,m);n++;
-  }else{
-   m.setLatLng([lat,lon]);m.setStyle({fillColor:mapColor(c)});n++;
-  }
-  present.add(key);
- }
- for(const [key,m] of Array.from(mapMarkers))if(!present.has(key)){m.remove();mapMarkers.delete(key)}
- E.mapCount.textContent=present.size+(clipped?' (máx. '+MAP_CAP+')':'')+' en mapa';
- if(present.size&&!cameraMap._capyFitted){
-  const bounds=L.latLngBounds(Array.from(mapMarkers.values()).map(m=>m.getLatLng()));
-  if(bounds.isValid()){cameraMap.fitBounds(bounds.pad(.08),{maxZoom:13});cameraMap._capyFitted=true}
- }
-}
-function fitMapToMarkers(){
- if(!mapReady||!cameraMap)return;
- const pts=Array.from(mapMarkers.values()).map(m=>m.getLatLng());
- if(!pts.length){cameraMap.setView([REF.lat,REF.lon],11);return}
- cameraMap.fitBounds(L.latLngBounds(pts).pad(.08),{maxZoom:13});
-}
-function switchTab(tab){
- const viewer=tab==='viewer';
- document.getElementById('viewerPanel').style.display=viewer?'block':'none';
- document.getElementById('mapPanel').style.display=viewer?'none':'block';
- document.getElementById('tabViewer').classList.toggle('active',viewer);
- document.getElementById('tabMap').classList.toggle('active',!viewer);
- document.getElementById('tabViewer').setAttribute('aria-selected',viewer?'true':'false');
- document.getElementById('tabMap').setAttribute('aria-selected',viewer?'false':'true');
- if(viewer)return;
- ensureMap().then(ok=>{
-  if(!ok||!mapReady)return;
-  cameraMap.invalidateSize();refreshMap();fitMapToMarkers();
-  setTimeout(()=>{if(mapReady)cameraMap.invalidateSize()},120);
- });
-}
-let rzTimer=null;
-window.addEventListener('resize',()=>{clearTimeout(rzTimer);rzTimer=setTimeout(()=>{if(mapReady&&cameraMap)cameraMap.invalidateSize()},150)});
-
-/* ===== auto ===== */
-function interval(){return Number(E.autoInt.value)||0}
-function resetCountdown(){nextAt=interval()&&!paused?Date.now()+interval()*1000:0;tick()}
-function tick(){
- const iv=interval();
- if(!iv){E.cd.textContent='';E.pause.disabled=true;return}
- E.pause.disabled=false;
- if(paused){E.cd.textContent='En pausa';return}
- if(!selected||selected.kind==='portal'||selected.kind==='iframe'||selected.kind==='hls'||selected.kind==='video'||selected.kind==='mjpeg'){E.cd.textContent='';nextAt=Date.now()+iv*1000;maybeCatalog();return}
- const left=Math.max(0,Math.round((nextAt-Date.now())/1000));
- E.cd.textContent=(left>=60?Math.floor(left/60)+' min '+(left%60)+' s':left+' s');
- if(Date.now()>=nextAt){
-  if(document.hidden)nextAt=Date.now()+5000;
-  else{nextAt=Date.now()+iv*1000;showCam(selected,true)}
- }
- maybeCatalog();
-}
-function maybeCatalog(){
- if(!interval()||paused||catalogLoading||document.hidden||!lastCatalog)return;
- if(Date.now()-lastCatalog.getTime()>3600*1000)loadCatalogs();
-}
-setInterval(tick,1000);
-
-function setStatus(extra){
- E.status.replaceChildren();
- if(catalogLoading){E.status.appendChild(el('span',null,'Cargando catálogos…'));return}
- E.status.append(el('b',null,String(dgtCams.length)),document.createTextNode(' DGT'));
- if(valenciaCams.length)E.status.appendChild(document.createTextNode(' · '+valenciaCams.length+' València'));
- if(extraCams.length)E.status.appendChild(document.createTextNode(' · '+extraCams.length+' mundo'));
- if(customCams.length)E.status.appendChild(document.createTextNode(' · '+customCams.length+' propias'));
- if(lastCatalog)E.status.appendChild(document.createTextNode(' · '+fmtTime(lastCatalog)));
- if(extra)E.status.appendChild(document.createTextNode(' ('+extra+')'));
- if(catalogError)E.status.appendChild(el('span',null,' · ⚠'));
-}
-
-/* ===== fuentes ===== */
-function paintSources(){
- E.srcList.replaceChildren();
- for(const s of SOURCES){
-  const row=el('label','srcRow');
-  const cb=document.createElement('input');cb.type='checkbox';cb.checked=!!s.enabled;cb.disabled=s.state==='loading';
-  cb.addEventListener('change',()=>toggleSource(s,cb.checked));
-  const cnt=el('span','srcCount',s.state==='loading'?'…':(s.state==='error'?'⚠':(s.count!=null?String(s.count):'')));
-  if(s.state==='error')cnt.classList.add('err');
-  if(s.state==='loading')cnt.classList.add('load');
-  row.append(cb,el('span','srcName',s.org+(s.town?' · '+s.town:'')+(s.portal?' (portal)':'')),cnt);
-  E.srcList.appendChild(row);
- }
-}
-async function toggleSource(src,on){
- src.enabled=on;saveSources();
- if(!on){extraCams=extraCams.filter(c=>c.sourceId!==src.id);src.state='';src.count=null;paintSources();rebuildAll();setStatus();return}
- if(src.state==='done'||src.state==='loading')return;
- if(src.portal){
-  extraCams=extraCams.filter(c=>c.sourceId!==src.id).concat({uid:'x-'+src.id,kind:'portal',org:src.org,name:src.org+' · directorio',town:'',prov:'',zone:src.zone,road:'',pk:null,dir:'',lat:null,lon:null,img:'',src:src.url,url:src.url,sourceId:src.id,desc:'Directorio mundial de webcams.'});
-  src.state='done';src.count=1;paintSources();rebuildAll();setStatus();return;
- }
- src.state='loading';paintSources();
- let acc=[];
- for(const u of (src.urls||[src.url])){
-  try{
-   const r=await fetchT(u,25000,{headers:{Accept:'application/json'}});
-   if(!r.ok)continue;
-   acc=acc.concat(src.parse(await r.json())||[]);
-  }catch(e){}
-  if(acc.length>=SRC_CAP)break;
- }
- const seen=new Set(),cams=[];
- for(const o of acc.slice(0,SRC_CAP)){
-  const img=safeUrl(o.img||'');if(!img)continue;
-  const uid='x-'+src.id+'-'+String(o.id).replace(/[^\w.\-]/g,'');
-  if(seen.has(uid))continue;seen.add(uid);
-  const lat=Number(o.lat),lon=Number(o.lon),ok=isFinite(lat)&&isFinite(lon)&&lat!==0&&lon!==0;
-  cams.push({uid,kind:classifyCameraUrl(img)||'img',org:src.org,name:o.name||src.org,town:src.town||'',prov:'',zone:src.zone,road:'',pk:null,dir:'',lat:ok?lat:null,lon:ok?lon:null,img,src:img,sourceId:src.id,desc:o.desc||'Catálogo público.'});
- }
- extraCams=extraCams.filter(c=>c.sourceId!==src.id).concat(cams);
- src.state=cams.length?'done':'error';src.count=cams.length;
- paintSources();rebuildAll();setStatus();
-}
-function saveSources(){try{lsSet('capy_sources',JSON.stringify(SOURCES.filter(s=>s.enabled).map(s=>s.id)))}catch(e){}}
-
-/* ===== propias ===== */
-function loadCustom(){
- try{const a=JSON.parse(lsGet('capy_custom_cams')||'[]');if(Array.isArray(a))customCams=a.filter(x=>x&&x.uid&&safeUrl(x.img)).map(x=>Object.assign({org:'Personalizada',road:'',pk:null,dir:'',prov:'',zone:'',lat:null,lon:null,desc:'Cámara propia.',custom:true},x,{src:x.img}))}catch(e){customCams=[]}
-}
-function saveCustom(){lsSet('capy_custom_cams',JSON.stringify(customCams.map(c=>({uid:c.uid,kind:c.kind,name:c.name,town:c.town,img:c.img}))))}
-$('#addForm').addEventListener('submit',ev=>{
- ev.preventDefault();
- const url=safeUrl($('#cUrl').value.trim()),name=$('#cName').value.trim();
- if(!url||!name)return;
- if(location.protocol==='https:'&&url.startsWith('http:')&&!confirm('URL http en página https: el navegador la bloqueará. ¿Guardar igualmente?'))return;
- const c={uid:'c-'+Date.now(),kind:$('#cType').value,name,town:$('#cTown').value.trim(),img:url,src:url,org:'Personalizada',road:'',pk:null,dir:'',prov:'',zone:'',lat:null,lon:null,desc:'Cámara propia.',custom:true};
- customCams.push(c);saveCustom();$('#addForm').reset();rebuildAll();setStatus();selectCam(c,null,true);
-});
-$('#btnDel').addEventListener('click',()=>{
- if(!selected||!selected.custom||!confirm('¿Quitar esta cámara?'))return;
- customCams=customCams.filter(c=>c.uid!==selected.uid);saveCustom();selected=null;viewToken++;hideMedia();
- setOverlay('idle','Cámara eliminada. Selecciona otra.');E.title.textContent='Selecciona una cámara';rebuildAll();setStatus();
-});
-
-/* ===== eventos ===== */
-let qt=null;
-E.q.addEventListener('input',()=>{clearTimeout(qt);qt=setTimeout(applyFilters,200)});
-E.fOrg.addEventListener('change',applyFilters);
-E.fKind.addEventListener('change',applyFilters);
-E.fZone.addEventListener('change',applyFilters);
-E.fProv.addEventListener('change',()=>{E.fTown.value='';E.fRoad.value='';rebuildDependent();applyFilters()});
-E.fTown.addEventListener('change',()=>{E.fRoad.value='';rebuildDependent();applyFilters()});
-E.fRoad.addEventListener('change',applyFilters);
-E.fDist.addEventListener('change',applyFilters);
-E.fSort.addEventListener('change',applyFilters);
-E.thumbs.addEventListener('change',()=>{lsSet('capy_thumbs',E.thumbs.checked?'1':'0');applyFilters()});
-$('#btnReset').addEventListener('click',()=>{E.q.value='';E.fOrg.value='';E.fKind.value='';E.fZone.value='';E.fProv.value='';E.fTown.value='';E.fRoad.value='';E.fDist.value='0';rebuildDependent();applyFilters()});
-E.list.addEventListener('scroll',()=>{if(shown<filtered.length&&E.list.scrollTop+E.list.clientHeight>=E.list.scrollHeight-300)renderMore()},{passive:true});
-$('#btnCatalog').addEventListener('click',()=>loadCatalogs());
-$('#tabViewer').addEventListener('click',()=>switchTab('viewer'));
-$('#tabMap').addEventListener('click',()=>switchTab('map'));
-$('#btnReload').addEventListener('click',()=>{if(selected){showCam(selected,true);resetCountdown()}});
-$('#btnOpen').addEventListener('click',()=>{if(!selected)return;const u=safeUrl(selected.kind==='portal'?selected.url:selected.src);if(u)window.open(u,'_blank','noopener,noreferrer')});
-$('#btnMap').addEventListener('click',()=>{
- if(!selected||selected.lat==null)return;
- switchTab('map');
- ensureMap().then(ok=>{
-  if(!ok||!mapReady)return;
-  cameraMap.invalidateSize();cameraMap.setView([selected.lat,selected.lon],15);
-  const m=mapMarkers.get(String(selected.uid));if(m)setTimeout(()=>m.openPopup(),150);
- });
-});
-$('#btnFull').addEventListener('click',()=>{const v=$('#viewer'),f=v.requestFullscreen||v.webkitRequestFullscreen;if(f)f.call(v);else E.note.textContent='Pantalla completa no disponible.'});
-E.autoInt.addEventListener('change',()=>{lsSet('capy_auto',E.autoInt.value);resetCountdown()});
-E.pause.addEventListener('click',()=>{paused=!paused;E.pause.textContent=paused?'▶':'⏸';E.pause.classList.toggle('on',paused);resetCountdown()});
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&interval()&&!paused&&selected&&Date.now()>=nextAt)tick()});
-
-/* ===== inicio ===== */
-(function init(){
- const a=lsGet('capy_auto');if(a!==null&&Array.from(E.autoInt.options).some(o=>o.value===a))E.autoInt.value=a;
- const t=lsGet('capy_thumbs');const sd=navigator.connection&&navigator.connection.saveData;
- E.thumbs.checked=t!==null?t==='1':!sd;
- loadCustom();paintSources();rebuildAll();setStatus();tick();
- loadCatalogs();
- let saved=[];try{saved=JSON.parse(lsGet('capy_sources')||'[]')}catch(e){}
- if(Array.isArray(saved))for(const id of saved){const s=SOURCES.find(x=>x.id===id);if(s)toggleSource(s,true)}
-})();
-</script>
+<noscript>
+ <div class="noscript">Sin JavaScript no se pueden cargar los catálogos. Actívalo y recarga.</div>
+</noscript>
 </body>
 </html>
